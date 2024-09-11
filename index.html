@@ -10,7 +10,30 @@
 	<link rel="icon" href="favicon.png">
 </head>
 <body>
-	<h1>Hello, world!</h1>
+	<h1>The General Backlog</h1>
+	<div id="menu" class="add_entry">
+		<label>Title:</label>
+		<input type="text" id="add_entry_title" name="title" placeholder="e.g. Minecraft, Celeste, ..." required>
+		<label>Score:</label>
+		<input type="number" id="add_entry_score" name="score" placeholder="" required>
+		<label>Time to Completion:</label>
+		<input type="number" id="add_entry_time" name="time" placeholder="" required>
+		<button type="submit" onclick="add_entry()">Add Entry</button>
+	</div>
+	<table id="dashboard">
+		<thead>
+			<tr>
+				<th><input id="select_all" type="checkbox" onclick="select_all()"></th>
+				<th>Title</th>
+				<th>Score</th>
+				<th>Time to Completion</th>
+				<th>Priority</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr></tr>
+		</tbody>
+	</table>
 	<script src="app.js"></script>
 </body>
 </html>
