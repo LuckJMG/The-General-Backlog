@@ -1,8 +1,32 @@
 let entries = []
+let sort_order = "Priority"
 
 function calculate_priority(score, time) {
 	let priority = score / time
 	return priority * 100
+}
+
+function insert_to_dashboard(entry) {
+	const dashboard = document.getElementById("dashboard").children[1]
+	const entry_row = dashboard.insertRow(1)
+
+	const checkbox = document.createElement("input")
+	checkbox.type = "checkbox"
+	checkbox.onclick = show_delete
+	const checkbox_cell = entry_row.insertCell(0)
+	checkbox_cell.appendChild(checkbox)
+
+	const title_cell = entry_row.insertCell(1)
+	title_cell.innerHTML = entry.title
+
+	const score_cell = entry_row.insertCell(2)
+	score_cell.innerHTML = entry.score
+
+	const time_cell = entry_row.insertCell(3)
+	time_cell.innerHTML = entry.time
+
+	const priority_cell = entry_row.insertCell(4)
+	priority_cell.innerHTML = entry.priority
 }
 
 function add_entry() {
@@ -27,34 +51,14 @@ function add_entry() {
 
 	// Add to database
 	const priority = calculate_priority(score, time)
-	entries.push({
+	const entry = {
 		"title": title,
 		"score": score,
 		"time": time,
 		"priority": priority
-	})
-
-	// Insert into dashboard
-	const dashboard = document.getElementById("dashboard")
-	const entry = dashboard.insertRow(1)
-
-	const checkbox = document.createElement("input")
-	checkbox.type = "checkbox"
-	checkbox.onclick = show_delete
-	const checkbox_cell = entry.insertCell(0)
-	checkbox_cell.appendChild(checkbox)
-
-	const title_cell = entry.insertCell(1)
-	title_cell.innerHTML = title
-
-	const score_cell = entry.insertCell(2)
-	score_cell.innerHTML = score
-
-	const time_cell = entry.insertCell(3)
-	time_cell.innerHTML = time
-
-	const priority_cell = entry.insertCell(4)
-	priority_cell.innerHTML = priority
+	}
+	entries.push(entry)
+	sort_entries(sort_order, false)
 }
 
 function show_delete() {
@@ -105,4 +109,37 @@ function select_all() {
 		.map(checkbox => checkbox.checked = is_selected)
 
 	show_delete()
+}
+
+function sort_entries(column, reverse = true) {
+	switch(column) {
+		case "Title Reverse":
+		case "Title":
+			entries.sort((a, b) => (a.title > b.title) ? 1 : -1)
+			if (reverse) sort_order = sort_order === "Title" ? "Title Reverse" : "Title"
+			break;
+		case "Score Reverse":
+		case "Score":
+			entries.sort((a, b) => a.score - b.score)
+			if (reverse) sort_order = sort_order === "Score"  ? "Score Reverse" : "Score"
+			break;
+		case "Time Reverse":
+		case "Time":
+			entries.sort((a, b) => a.time - b.time)
+			if (reverse) sort_order = sort_order === "Time" ? "Score Reverse" : "Time"
+			break;
+		default:
+			entries.sort((a, b) => a.priority - b.priority)
+			if (reverse) sort_order = sort_order === "Priority"  ? "Priority Reverse" : "Priority"
+	}
+
+	if (sort_order.includes("Reverse")) entries.reverse()
+
+	const dashboard_body = document.getElementsByTagName("tbody")[0]
+	Array.from(dashboard_body.children).map(row => row.remove())
+
+	const empty_row = document.createElement("tr")
+	empty_row.style.display = "none"
+	dashboard_body.appendChild(empty_row)
+	entries.map(entry => insert_to_dashboard(entry))
 }

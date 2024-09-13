@@ -24,14 +24,14 @@
 		<thead>
 			<tr>
 				<th><input id="select_all" type="checkbox" onclick="select_all()"></th>
-				<th>Title</th>
-				<th>Score</th>
-				<th>Time to Completion</th>
-				<th>Priority</th>
+				<th onclick="sort_entries('Title')">Title</th>
+				<th onclick="sort_entries('Score')">Score</th>
+				<th onclick="sort_entries('Time')">Time to Completion</th>
+				<th onclick="sort_entries()">Priority</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr></tr>
+			<tr style="style: none;"></tr>
 		</tbody>
 	</table>
 	<script src="app.js"></script>
