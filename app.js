@@ -1,9 +1,16 @@
 let entries = []
 let sort_order = "Priority"
+let max_priority = 10
+let min_priority = 0
+let scale = 100
 
 function calculate_priority(score, time) {
 	let priority = score / time
-	return priority * 100
+	return priority
+}
+
+function scale_priority(priority) {
+	return ((priority - min_priority) / (max_priority - min_priority)) * scale;
 }
 
 function insert_to_dashboard(entry) {
@@ -26,7 +33,7 @@ function insert_to_dashboard(entry) {
 	time_cell.innerHTML = entry.time
 
 	const priority_cell = entry_row.insertCell(4)
-	priority_cell.innerHTML = entry.priority
+	priority_cell.innerHTML = Math.round(scale_priority(entry.priority))
 }
 
 function add_entry() {
@@ -58,6 +65,11 @@ function add_entry() {
 		"priority": priority
 	}
 	entries.push(entry)
+
+	max_priority = Math.max(...entries.map(entry => entry.priority))
+	min_priority = Math.min(...entries.map(entry => entry.priority))
+	min_priority = max_priority === min_priority ? 0 : min_priority
+
 	sort_entries(sort_order, false)
 }
 
