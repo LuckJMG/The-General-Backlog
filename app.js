@@ -14,10 +14,6 @@ let sortOrder = {
 	reverse: false,
 };
 
-function scalePriority(priority) {
-	return ((priority - minPriority) / (maxPriority - minPriority)) * SCALE;
-}
-
 function addEntry() {
 	// Get values
 	let title = document.getElementById("add_entry_title").value;
@@ -130,7 +126,9 @@ function insertToDashboard(entry) {
 	timeCell.innerHTML = entry.time;
 
 	let priorityCell = row.insertCell(4);
-	priorityCell.innerHTML = Math.round(scalePriority(entry.priority));
+	let range = maxPriority - minPriority;
+	let scaledPriority = ((entry.priority - minPriority) / range) * SCALE;
+	priorityCell.innerHTML = Math.round(scaledPriority);
 }
 
 function showDeleteButton() {
