@@ -1,8 +1,18 @@
+const Column = {
+	TITLE: "Title",
+	SCORE: "Score",
+	TIME: "Time",
+	PRIORITY: "Priority",
+};
+
 const SCALE = 100;
 let entries = [];
-let sortOrder = "Priority";
 let maxPriority = 10;
 let minPriority = 0;
+let sortOrder = {
+	column: Column.PRIORITY,
+	reverse: false,
+};
 
 function scalePriority(priority) {
 	return ((priority - minPriority) / (maxPriority - minPriority)) * SCALE;
@@ -41,7 +51,7 @@ function addEntry() {
 	minPriority = Math.min(...entries.map(entry => entry.priority));
 	minPriority = maxPriority === minPriority ? 0 : minPriority;
 
-	sortEntries(sortOrder, false);
+	sortEntries(sortOrder, true);
 }
 
 function deleteEntries() {
@@ -66,29 +76,30 @@ function deleteEntries() {
 	rows.map(row => row.remove());
 }
 
-function sortEntries(column, reverse = true) {
+function sortEntries(column, maintainOrder = false) {
+	if (column === sortOrder.column && !maintainOrder) {
+		sortOrder.reverse = !sortOrder.reverse;
+	}
+
 	switch(column) {
-		case "Title Reverse":
-		case "Title":
+		case Column.TITLE:
 			entries.sort((a, b) => (a.title > b.title) ? 1 : -1);
-			if (reverse) sortOrder = sortOrder === "Title" ? "Title Reverse" : "Title";
+			if (!maintainOrder) sortOrder.column = Column.TITLE;
 			break;
-		case "Score Reverse":
-		case "Score":
+		case Column.SCORE:
 			entries.sort((a, b) => a.score - b.score);
-			if (reverse) sortOrder = sortOrder === "Score"  ? "Score Reverse" : "Score";
+			if (!maintainOrder) sortOrder.column = Column.SCORE;
 			break;
-		case "Time Reverse":
-		case "Time":
+		case Column.TIME:
 			entries.sort((a, b) => a.time - b.time);
-			if (reverse) sortOrder = sortOrder === "Time" ? "Score Reverse" : "Time";
+			if (!maintainOrder) sortOrder.column = Column.TIME;
 			break;
 		default:
 			entries.sort((a, b) => a.priority - b.priority);
-			if (reverse) sortOrder = sortOrder === "Priority"  ? "Priority Reverse" : "Priority";
+			if (!maintainOrder) sortOrder.column = Column.PRIORITY;
 	}
 
-	if (sortOrder.includes("Reverse")) entries.reverse();
+	if (sortOrder.reverse) entries.reverse();
 
 	const dashboard_body = document.getElementsByTagName("tbody")[0];
 	Array.from(dashboard_body.children).map(row => row.remove());
