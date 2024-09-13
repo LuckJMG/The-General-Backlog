@@ -1,157 +1,157 @@
-let entries = []
-let sort_order = "Priority"
-let max_priority = 10
-let min_priority = 0
-let scale = 100
+const SCALE = 100;
+let entries = [];
+let sortOrder = "Priority";
+let maxPriority = 10;
+let minPriority = 0;
 
-function calculate_priority(score, time) {
-	let priority = score / time
-	return priority
+function scalePriority(priority) {
+	return ((priority - minPriority) / (maxPriority - minPriority)) * SCALE;
 }
 
-function scale_priority(priority) {
-	return ((priority - min_priority) / (max_priority - min_priority)) * scale;
-}
-
-function insert_to_dashboard(entry) {
-	const dashboard = document.getElementById("dashboard").children[1]
-	const entry_row = dashboard.insertRow(1)
-
-	const checkbox = document.createElement("input")
-	checkbox.type = "checkbox"
-	checkbox.onclick = show_delete
-	const checkbox_cell = entry_row.insertCell(0)
-	checkbox_cell.appendChild(checkbox)
-
-	const title_cell = entry_row.insertCell(1)
-	title_cell.innerHTML = entry.title
-
-	const score_cell = entry_row.insertCell(2)
-	score_cell.innerHTML = entry.score
-
-	const time_cell = entry_row.insertCell(3)
-	time_cell.innerHTML = entry.time
-
-	const priority_cell = entry_row.insertCell(4)
-	priority_cell.innerHTML = Math.round(scale_priority(entry.priority))
-}
-
-function add_entry() {
+function addEntry() {
 	// Get values
-	const title = document.getElementById("add_entry_title").value
-	if (title === "") return
+	let title = document.getElementById("add_entry_title").value;
+	if (title === "") return;
 
-	if (entries.filter(entry => entry.title === title).length !== 0) return
+	if (entries.filter(entry => entry.title === title).length !== 0) return;
 
-	let score = document.getElementById("add_entry_score").value
-	if (score === "") return
-	score = parseInt(score)
+	let score = document.getElementById("add_entry_score").value;
+	if (score === "") return;
+	score = parseInt(score);
 
-	let time = parseFloat(document.getElementById("add_entry_time").value)
-	if (time === "") return
-	time = parseInt(time)
+	let time = parseFloat(document.getElementById("add_entry_time").value);
+	if (time === "") return;
+	time = parseInt(time);
 
 	// Reset inputs
-	document.getElementById("add_entry_title").value = ""
-	document.getElementById("add_entry_score").value = ""
-	document.getElementById("add_entry_time").value = ""
+	document.getElementById("add_entry_title").value = "";
+	document.getElementById("add_entry_score").value = "";
+	document.getElementById("add_entry_time").value = "";
 
 	// Add to database
-	const priority = calculate_priority(score, time)
-	const entry = {
+	let entry = {
 		"title": title,
 		"score": score,
 		"time": time,
-		"priority": priority
-	}
-	entries.push(entry)
+		"priority": score / time,
+	};
+	entries.push(entry);
 
-	max_priority = Math.max(...entries.map(entry => entry.priority))
-	min_priority = Math.min(...entries.map(entry => entry.priority))
-	min_priority = max_priority === min_priority ? 0 : min_priority
+	maxPriority = Math.max(...entries.map(entry => entry.priority));
+	minPriority = Math.min(...entries.map(entry => entry.priority));
+	minPriority = maxPriority === minPriority ? 0 : minPriority;
 
-	sort_entries(sort_order, false)
+	sortEntries(sortOrder, false);
 }
 
-function show_delete() {
+function deleteEntries() {
 	// Get all checkboxes
-	const checkbox_list = Array.from(document.getElementsByTagName("input"))
-		.filter(input => input.type === "checkbox")
-
-	// Check if any are selected
-	const selected = checkbox_list.some(checkbox => checkbox.checked === true)
-	let delete_button = document.getElementById("delete_button")
-	if (selected && !delete_button) {
-		delete_button = document.createElement("button")
-		delete_button.innerHTML = "Delete"
-		delete_button.id = "delete_button"
-		delete_button.onclick = delete_entries
-
-		const menu = document.getElementById("menu")
-		menu.appendChild(delete_button)
-	}
-	else if (!selected) {
-		delete_button.remove()
-	}
-}
-
-function delete_entries() {
-	// Get all checkboxes
-	const checkbox_list = Array.from(document.getElementsByTagName("input"))
-		.filter(input => input.type === "checkbox" && input.checked === true && input.id !== "select_all")
+	let checkboxList = Array.from(document.getElementsByTagName("input"))
+		.filter(input => {
+			return input.type === "checkbox"
+				&& input.checked === true
+				&& input.id !== "select_all";
+		});
 
 	// Get entries to delete
-	const entry_rows = checkbox_list.map(checkbox => {
-		return checkbox.parentElement.parentElement
-	})
+	let rows = checkboxList.map(checkbox => {
+		return checkbox.parentElement.parentElement;
+	});
 
 	// Remove entries from database
-	const titles = entry_rows.map(entry_row => entry_row.children[1].innerHTML)
-	entries = entries.filter(entry => !titles.includes(entry.title))
+	let titles = rows.map(row => row.children[1].innerHTML);
+	entries = entries.filter(entry => !titles.includes(entry.title));
 	
 	// Remove rows of deleted entries
-	entry_rows.map(entry_row => entry_row.remove())
+	rows.map(row => row.remove());
 }
 
-function select_all() {
-	const is_selected = document.getElementById("select_all").checked
-
-	Array.from(document.getElementsByTagName("input"))
-		.filter(input => input.type === "checkbox" && input.id !== "select_all")
-		.map(checkbox => checkbox.checked = is_selected)
-
-	show_delete()
-}
-
-function sort_entries(column, reverse = true) {
+function sortEntries(column, reverse = true) {
 	switch(column) {
 		case "Title Reverse":
 		case "Title":
-			entries.sort((a, b) => (a.title > b.title) ? 1 : -1)
-			if (reverse) sort_order = sort_order === "Title" ? "Title Reverse" : "Title"
+			entries.sort((a, b) => (a.title > b.title) ? 1 : -1);
+			if (reverse) sortOrder = sortOrder === "Title" ? "Title Reverse" : "Title";
 			break;
 		case "Score Reverse":
 		case "Score":
-			entries.sort((a, b) => a.score - b.score)
-			if (reverse) sort_order = sort_order === "Score"  ? "Score Reverse" : "Score"
+			entries.sort((a, b) => a.score - b.score);
+			if (reverse) sortOrder = sortOrder === "Score"  ? "Score Reverse" : "Score";
 			break;
 		case "Time Reverse":
 		case "Time":
-			entries.sort((a, b) => a.time - b.time)
-			if (reverse) sort_order = sort_order === "Time" ? "Score Reverse" : "Time"
+			entries.sort((a, b) => a.time - b.time);
+			if (reverse) sortOrder = sortOrder === "Time" ? "Score Reverse" : "Time";
 			break;
 		default:
-			entries.sort((a, b) => a.priority - b.priority)
-			if (reverse) sort_order = sort_order === "Priority"  ? "Priority Reverse" : "Priority"
+			entries.sort((a, b) => a.priority - b.priority);
+			if (reverse) sortOrder = sortOrder === "Priority"  ? "Priority Reverse" : "Priority";
 	}
 
-	if (sort_order.includes("Reverse")) entries.reverse()
+	if (sortOrder.includes("Reverse")) entries.reverse();
 
-	const dashboard_body = document.getElementsByTagName("tbody")[0]
-	Array.from(dashboard_body.children).map(row => row.remove())
+	const dashboard_body = document.getElementsByTagName("tbody")[0];
+	Array.from(dashboard_body.children).map(row => row.remove());
 
-	const empty_row = document.createElement("tr")
-	empty_row.style.display = "none"
-	dashboard_body.appendChild(empty_row)
-	entries.map(entry => insert_to_dashboard(entry))
+	const empty_row = document.createElement("tr");
+	empty_row.style.display = "none";
+	dashboard_body.appendChild(empty_row);
+	entries.map(entry => insertToDashboard(entry));
 }
+
+function insertToDashboard(entry) {
+	let dashboard = document.getElementById("dashboard").children[1];
+	let row = dashboard.insertRow(1);
+
+	let checkbox = document.createElement("input");
+	checkbox.type = "checkbox";
+	checkbox.onclick = showDeleteButton;
+	let checkboxCell = row.insertCell(0);
+	checkboxCell.appendChild(checkbox);
+
+	let titleCell = row.insertCell(1);
+	titleCell.innerHTML = entry.title;
+
+	let scoreCell = row.insertCell(2);
+	scoreCell.innerHTML = entry.score;
+
+	let timeCell = row.insertCell(3);
+	timeCell.innerHTML = entry.time;
+
+	let priorityCell = row.insertCell(4);
+	priorityCell.innerHTML = Math.round(scalePriority(entry.priority));
+}
+
+function showDeleteButton() {
+	// Get all checkboxes
+	let checkboxList = Array.from(document.getElementsByTagName("input"))
+		.filter(input => input.type === "checkbox");
+
+	// Check if any are selected
+	let selected = checkboxList.some(checkbox => checkbox.checked === true);
+	let deleteButton = document.getElementById("delete_button");
+
+	if (selected && !deleteButton) {
+		deleteButton = document.createElement("button");
+		deleteButton.innerHTML = "Delete";
+		deleteButton.id = "delete_button";
+		deleteButton.onclick = deleteEntries;
+
+		const menu = document.getElementById("menu");
+		menu.appendChild(deleteButton);
+	}
+	else if (!selected) {
+		deleteButton.remove();
+	}
+}
+
+function selectAllEntries() {
+	let isSelected = document.getElementById("select_all").checked;
+
+	Array.from(document.getElementsByTagName("input"))
+		.filter(input => input.type === "checkbox" && input.id !== "select_all")
+		.map(checkbox => checkbox.checked = isSelected);
+
+	showDeleteButton();
+}
+

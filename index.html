@@ -18,16 +18,16 @@
 		<input type="number" id="add_entry_score" name="score" placeholder="" required>
 		<label>Time to Completion:</label>
 		<input type="number" id="add_entry_time" name="time" placeholder="" required>
-		<button type="submit" onclick="add_entry()">Add Entry</button>
+		<button type="submit" onclick="addEntry()">Add Entry</button>
 	</div>
 	<table id="dashboard">
 		<thead>
 			<tr>
-				<th><input id="select_all" type="checkbox" onclick="select_all()"></th>
-				<th onclick="sort_entries('Title')">Title</th>
-				<th onclick="sort_entries('Score')">Score</th>
-				<th onclick="sort_entries('Time')">Time to Completion</th>
-				<th onclick="sort_entries()">Priority</th>
+				<th><input id="select_all" type="checkbox" onclick="selectAllEntries()"></th>
+				<th onclick="sortEntries('Title')">Title</th>
+				<th onclick="sortEntries('Score')">Score</th>
+				<th onclick="sortEntries('Time')">Time to Completion</th>
+				<th onclick="sortEntries('Priority')">Priority</th>
 			</tr>
 		</thead>
 		<tbody>
