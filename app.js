@@ -16,9 +16,9 @@ const Column = {
 		position: 2,
 		name: "score",
 	},
-	TIME: {
+	DURATION: {
 		position: 3,
-		name: "time",
+		name: "duration",
 	},
 	PRIORITY: {
 		position: 4,
@@ -53,22 +53,22 @@ function addEntry() {
 	if (score === "") return;
 	score = parseInt(score);
 
-	let timeInput = document.getElementById("add_entry_" + Column.TIME.name);
-	let time = parseFloat(timeInput.value);
-	if (time === "") return;
-	time = parseInt(time);
+	let durationInput = document.getElementById("add_entry_" + Column.DURATION.name);
+	let duration = parseFloat(durationInput.value);
+	if (duration === "") return;
+	duration = parseInt(duration);
 
 	// Reset inputs
 	titleInput.value = "";
 	scoreInput.value = "";
-	timeInput.value = "";
+	durationInput.value = "";
 
 	// Add to database
 	let entry = {
 		"title": title,
 		"score": score,
-		"time": time,
-		"priority": score / time,
+		"duration": duration,
+		"priority": score / duration,
 	};
 	entries.push(entry);
 
@@ -124,9 +124,9 @@ function sortEntries(column, maintainOrder = false) {
 			entries.sort((a, b) => a.score - b.score);
 			if (!maintainOrder) sortOrder.column = Column.SCORE.name;
 			break;
-		case Column.TIME.name:
-			entries.sort((a, b) => a.time - b.time);
-			if (!maintainOrder) sortOrder.column = Column.TIME.name;
+		case Column.DURATION.name:
+			entries.sort((a, b) => a.duration - b.duration);
+			if (!maintainOrder) sortOrder.column = Column.DURATION.name;
 			break;
 		default:
 			entries.sort((a, b) => a.priority - b.priority);
@@ -165,12 +165,13 @@ function editEntry(entry) {
 	let scoreInput = document.getElementById(`${Column.SCORE.name}_${entryId}`);
 	entries[entryIndex].score = parseInt(scoreInput.value);
 
-	let timeInput = document.getElementById(`${Column.TIME.name}_${entryId}`);
-	entries[entryIndex].time = parseInt(timeInput.value);
+	let durationId = `${Column.DURATION.name}_${entryId}`;
+	let durationInput = document.getElementById(durationId);
+	entries[entryIndex].duration = parseInt(durationInput.value);
 
 	let score = entries[entryIndex].score;
-	let time = entries[entryIndex].time;
-	entries[entryIndex].priority = score / time;
+	let duration = entries[entryIndex].duration;
+	entries[entryIndex].priority = score / duration;
 
 	maxPriority = Math.max(...entries.map(entry => entry.priority));
 	minPriority = Math.min(...entries.map(entry => entry.priority));
@@ -203,7 +204,7 @@ function insertToDashboard(entry) {
 	titleCell.onclick = () => enableEditing(entry.title);
 
 	insertCell(Column.SCORE.position, entry.score);
-	insertCell(Column.TIME.position, entry.time);
+	insertCell(Column.DURATION.position, entry.duration);
 
 	let range = maxPriority - minPriority;
 	let scaledPriority = ((entry.priority - minPriority) / range) * SCALE;
@@ -234,7 +235,7 @@ function enableEditing(title) {
 
 	addInput("title", title, Column.TITLE.position);
 	addInput("score", entry.score, Column.SCORE.position);
-	addInput("time", entry.time, Column.TIME.position);
+	addInput("duration", entry.duration, Column.DURATION.position);
 
 	let acceptButton = document.createElement("button");
 	acceptButton.innerHTML = "Accept";
