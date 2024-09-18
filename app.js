@@ -120,6 +120,10 @@ function sortEntries(column, maintainOrder = false) {
 	const empty_row = document.createElement("tr");
 	empty_row.style.display = "none";
 	dashboard_body.appendChild(empty_row);
+
+	let maxPriority = Math.max(...entries.map(entry => entry.priority));
+	let minPriority = Math.min(...entries.map(entry => entry.priority));
+	minPriority = maxPriority === minPriority ? 0 : minPriority;
 	entries.map(entry => insertToDashboard(entry));
 }
 
@@ -143,7 +147,9 @@ function editEntry(entry) {
 	let timeInput = document.getElementById("time_" + entryId);
 	entries[entryIndex].time = parseInt(timeInput.value);
 
-	entries[entryIndex].priority = entries[entryIndex].score / entries[entryIndex].time;
+	let score = entries[entryIndex].score;
+	let time = entries[entryIndex].time;
+	entries[entryIndex].priority = score / time;
 
 	maxPriority = Math.max(...entries.map(entry => entry.priority));
 	minPriority = Math.min(...entries.map(entry => entry.priority));
@@ -160,26 +166,27 @@ function insertToDashboard(entry) {
 	let row = dashboard.insertRow(1);
 	row.id = "entry_" + entry.title.replace(" ", "_");
 
+	const insertCell = (column, value) => {
+		let cell = row.insertCell(column);
+		cell.innerHTML = value;
+		return cell;
+	}
+
 	let checkbox = document.createElement("input");
 	checkbox.type = "checkbox";
 	checkbox.onclick = showDeleteButton;
 	let checkboxCell = row.insertCell(0);
 	checkboxCell.appendChild(checkbox);
 
-	let titleCell = row.insertCell(1);
-	titleCell.innerHTML = entry.title;
+	let titleCell = insertCell(1, entry.title);
 	titleCell.onclick = () => enableEditing(entry.title);
 
-	let scoreCell = row.insertCell(2);
-	scoreCell.innerHTML = entry.score;
+	insertCell(2, entry.score);
+	insertCell(3, entry.time);
 
-	let timeCell = row.insertCell(3);
-	timeCell.innerHTML = entry.time;
-
-	let priorityCell = row.insertCell(4);
 	let range = maxPriority - minPriority;
 	let scaledPriority = ((entry.priority - minPriority) / range) * SCALE;
-	priorityCell.innerHTML = Math.round(scaledPriority);
+	insertCell(4, Math.round(scaledPriority));
 }
 
 /**
@@ -192,32 +199,21 @@ function enableEditing(title) {
 	let entry = entries.find(a => a.title === title);
 	let row = document.getElementById("entry_" + entryId);
 
-	let titleInput = document.createElement("input");
-	titleInput.type = "text";
-	titleInput.value = title;
-	titleInput.id = "title_" + entryId;
-	titleInput.required = true;
-	let titleCell = row.children[1];
-	titleCell.innerHTML = "";
-	titleCell.appendChild(titleInput);
+	const addInput = (name, value, column) => {
+		let input = document.createElement("input");
+		input.type = "text";
+		input.value = value;
+		input.id = name + "_" + entryId;
+		input.required = true;
 
-	let scoreInput = document.createElement("input");
-	scoreInput.type = "number";
-	scoreInput.value = entry.score;
-	scoreInput.id = "score_" + entryId;
-	scoreInput.required = true;
-	let scoreCell = row.children[2];
-	scoreCell.innerHTML = "";
-	scoreCell.appendChild(scoreInput);
+		let cell = row.children[column];
+		cell.innerHTML = "";
+		cell.appendChild(input);
+	}
 
-	let timeInput = document.createElement("input");
-	timeInput.type = "number";
-	timeInput.value = entry.time;
-	timeInput.id = "time_" + entryId;
-	timeInput.required = true;
-	let timeCell = row.children[3];
-	timeCell.innerHTML = "";
-	timeCell.appendChild(timeInput);
+	addInput("title", title, 1);
+	addInput("score", entry.score, 2);
+	addInput("time", entry.time, 3);
 
 	let acceptButton = document.createElement("button");
 	acceptButton.innerHTML = "Accept";
