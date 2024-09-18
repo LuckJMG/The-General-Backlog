@@ -1,4 +1,29 @@
 /**
+* An entry on the database
+*/
+class Entry {
+	/**
+	* @constructor
+	* @param {string} title Title of the entry.
+	* @param {number} title Score of the entry.
+	* @param {number} title Duration of the entry.
+	*/
+	constructor(title, score, duration) {
+		/** Title of the entry. @type {string} */
+		this.title = title;
+
+		/** Score of the entry. @type {number} */
+		this.score = score;
+
+		/** Duration of the entry. @type {number} */
+		this.duration = duration;
+
+		/** Priority of the entry. @type {number} */
+		this.priority = score / duration;
+	}
+}
+
+/**
 * Column types
 * @readonly
 * @enum {Obj.<number, string>}
@@ -64,19 +89,14 @@ function addEntry() {
 	durationInput.value = "";
 
 	// Add to database
-	let entry = {
-		"title": title,
-		"score": score,
-		"duration": duration,
-		"priority": score / duration,
-	};
+	let entry = new Entry(title, score, duration);
 	entries.push(entry);
 
 	maxPriority = Math.max(...entries.map(entry => entry.priority));
 	minPriority = Math.min(...entries.map(entry => entry.priority));
 	minPriority = maxPriority === minPriority ? 0 : minPriority;
 
-	sortEntries(sortOrder, true);
+	sortEntries(sortOrder.column, true);
 }
 
 /**
@@ -150,7 +170,7 @@ function sortEntries(column, maintainOrder = false) {
 
 /**
 * Edits an entry and updates the dashboard accordingly.
-* @params {Object} entry The entry to edit.
+* @params {Entry} entry The entry to edit.
 */
 function editEntry(entry) {
 	let entryId = entry.title.replace(" ", "_");
@@ -181,7 +201,7 @@ function editEntry(entry) {
 
 /**
 * Inserts a new entry to the dashboard and updates it.
-* @param {Object} entry Entry to add to dashboard.
+* @param {Entry} entry Entry to add to dashboard.
 */
 function insertToDashboard(entry) {
 	let dashboard = document.getElementById("dashboard").children[1];
