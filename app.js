@@ -1,3 +1,7 @@
+/**
+* Column types
+* @enum {string}
+*/
 const Column = {
 	TITLE: "Title",
 	SCORE: "Score",
@@ -14,6 +18,10 @@ let sortOrder = {
 	reverse: false,
 };
 
+/**
+* Adds an entry to the list of entries by retrieving the input given
+* in the add_entry section.
+*/
 function addEntry() {
 	// Get values
 	let title = document.getElementById("add_entry_title").value;
@@ -50,6 +58,9 @@ function addEntry() {
 	sortEntries(sortOrder, true);
 }
 
+/**
+* Deletes selected entries on dashboard from the list of entries.
+*/
 function deleteEntries() {
 	// Get all checkboxes
 	let checkboxList = Array.from(document.getElementsByTagName("input"))
@@ -72,11 +83,17 @@ function deleteEntries() {
 	rows.map(row => row.remove());
 }
 
+/**
+* Sorts the entries by a given column and updates the dashboard.
+* @param {Column} column The column to sort the entries.
+* @param {boolean} [maintainOrder=false] Flag to maintain the order or
+*	invert it.
+*/
 function sortEntries(column, maintainOrder = false) {
 	if (column === sortOrder.column && !maintainOrder) {
 		sortOrder.reverse = !sortOrder.reverse;
 	}
-
+	
 	switch(column) {
 		case Column.TITLE:
 			entries.sort((a, b) => (a.title > b.title) ? 1 : -1);
@@ -106,6 +123,10 @@ function sortEntries(column, maintainOrder = false) {
 	entries.map(entry => insertToDashboard(entry));
 }
 
+/**
+* Edits an entry and updates the dashboard accordingly.
+* @params {Object} entry The entry to edit.
+*/
 function editEntry(entry) {
 	let entryId = entry.title.replace(" ", "_");
 	let entryIndex = entries.findIndex(a => a.title === entry.title);
@@ -130,6 +151,10 @@ function editEntry(entry) {
 	sortEntries(sortOrder.column, true);
 }
 
+/**
+* Inserts a new entry to the dashboard and updates it.
+* @param {Object} entry Entry to add to dashboard.
+*/
 function insertToDashboard(entry) {
 	let dashboard = document.getElementById("dashboard").children[1];
 	let row = dashboard.insertRow(1);
@@ -157,6 +182,10 @@ function insertToDashboard(entry) {
 	priorityCell.innerHTML = Math.round(scaledPriority);
 }
 
+/**
+* Enables the editing of an entry in the dashboard.
+* @param {string} title The title of the entry to enable editing.
+*/
 function enableEditing(title) {
 	sortEntries(sortOrder.column, true);
 	let entryId = title.replace(" ", "_");
@@ -198,6 +227,9 @@ function enableEditing(title) {
 	priorityCell.appendChild(acceptButton);
 }
 
+/**
+* Shows the delete button when a row in the dashboard is selected.
+*/
 function showDeleteButton() {
 	// Get all checkboxes
 	let checkboxList = Array.from(document.getElementsByTagName("input"))
@@ -221,6 +253,9 @@ function showDeleteButton() {
 	}
 }
 
+/**
+* Selects all rows on the dashboard.
+*/
 function selectAllEntries() {
 	let isSelected = document.getElementById("select_all").checked;
 
