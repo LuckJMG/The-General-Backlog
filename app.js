@@ -1,20 +1,38 @@
 /**
 * Column types
-* @enum {string}
+* @readonly
+* @enum {Obj.<number, string>}
 */
 const Column = {
-	TITLE: "Title",
-	SCORE: "Score",
-	TIME: "Time",
-	PRIORITY: "Priority",
+	SELECTION: {
+		position: 0,
+		name: "selection",
+	},
+	TITLE: {
+		position: 1,
+		name: "title",
+	},
+	SCORE: {
+		position: 2,
+		name: "score",
+	},
+	TIME: {
+		position: 3,
+		name: "time",
+	},
+	PRIORITY: {
+		position: 4,
+		name: "priority",
+	},
 };
+
 
 const SCALE = 100;
 let entries = [];
 let maxPriority = 10;
 let minPriority = 0;
 let sortOrder = {
-	column: Column.PRIORITY,
+	column: Column.PRIORITY.name,
 	reverse: false,
 };
 
@@ -24,23 +42,26 @@ let sortOrder = {
 */
 function addEntry() {
 	// Get values
-	let title = document.getElementById("add_entry_title").value;
+	let titleInput = document.getElementById("add_entry_" + Column.TITLE.name);
+	let title = titleInput.value;
 	if (title === "") return;
 
 	if (entries.filter(entry => entry.title === title).length !== 0) return;
 
-	let score = document.getElementById("add_entry_score").value;
+	let scoreInput = document.getElementById("add_entry_" + Column.SCORE.name);
+	let score = scoreInput.value;
 	if (score === "") return;
 	score = parseInt(score);
 
-	let time = parseFloat(document.getElementById("add_entry_time").value);
+	let timeInput = document.getElementById("add_entry_" + Column.TIME.name);
+	let time = parseFloat(timeInput.value);
 	if (time === "") return;
 	time = parseInt(time);
 
 	// Reset inputs
-	document.getElementById("add_entry_title").value = "";
-	document.getElementById("add_entry_score").value = "";
-	document.getElementById("add_entry_time").value = "";
+	titleInput.value = "";
+	scoreInput.value = "";
+	timeInput.value = "";
 
 	// Add to database
 	let entry = {
@@ -76,7 +97,7 @@ function deleteEntries() {
 	});
 
 	// Remove entries from database
-	let titles = rows.map(row => row.children[1].innerHTML);
+	let titles = rows.map(row => row.children[Column.TITLE.position].innerHTML);
 	entries = entries.filter(entry => !titles.includes(entry.title));
 	
 	// Remove rows of deleted entries
@@ -95,21 +116,21 @@ function sortEntries(column, maintainOrder = false) {
 	}
 	
 	switch(column) {
-		case Column.TITLE:
+		case Column.TITLE.name:
 			entries.sort((a, b) => (a.title > b.title) ? 1 : -1);
-			if (!maintainOrder) sortOrder.column = Column.TITLE;
+			if (!maintainOrder) sortOrder.column = Column.TITLE.name;
 			break;
-		case Column.SCORE:
+		case Column.SCORE.name:
 			entries.sort((a, b) => a.score - b.score);
-			if (!maintainOrder) sortOrder.column = Column.SCORE;
+			if (!maintainOrder) sortOrder.column = Column.SCORE.name;
 			break;
-		case Column.TIME:
+		case Column.TIME.name:
 			entries.sort((a, b) => a.time - b.time);
-			if (!maintainOrder) sortOrder.column = Column.TIME;
+			if (!maintainOrder) sortOrder.column = Column.TIME.name;
 			break;
 		default:
 			entries.sort((a, b) => a.priority - b.priority);
-			if (!maintainOrder) sortOrder.column = Column.PRIORITY;
+			if (!maintainOrder) sortOrder.column = Column.PRIORITY.name;
 	}
 
 	if (sortOrder.reverse) entries.reverse();
@@ -135,16 +156,16 @@ function editEntry(entry) {
 	let entryId = entry.title.replace(" ", "_");
 	let entryIndex = entries.findIndex(a => a.title === entry.title);
 
-	let titleInput = document.getElementById("title_" + entryId);
+	let titleInput = document.getElementById(`${Column.TITLE.name}_${entryId}`);
 	let newTitle = titleInput.value;
 	if (newTitle !== entry.title && entries.some(a => a.title === newTitle))
 		return;
 	entries[entryIndex].title = titleInput.value;
 
-	let scoreInput = document.getElementById("score_" + entryId);
+	let scoreInput = document.getElementById(`${Column.SCORE.name}_${entryId}`);
 	entries[entryIndex].score = parseInt(scoreInput.value);
 
-	let timeInput = document.getElementById("time_" + entryId);
+	let timeInput = document.getElementById(`${Column.TIME.name}_${entryId}`);
 	entries[entryIndex].time = parseInt(timeInput.value);
 
 	let score = entries[entryIndex].score;
@@ -175,18 +196,18 @@ function insertToDashboard(entry) {
 	let checkbox = document.createElement("input");
 	checkbox.type = "checkbox";
 	checkbox.onclick = showDeleteButton;
-	let checkboxCell = row.insertCell(0);
+	let checkboxCell = row.insertCell(Column.SELECTION.position);
 	checkboxCell.appendChild(checkbox);
 
-	let titleCell = insertCell(1, entry.title);
+	let titleCell = insertCell(Column.TITLE.position, entry.title);
 	titleCell.onclick = () => enableEditing(entry.title);
 
-	insertCell(2, entry.score);
-	insertCell(3, entry.time);
+	insertCell(Column.SCORE.position, entry.score);
+	insertCell(Column.TIME.position, entry.time);
 
 	let range = maxPriority - minPriority;
 	let scaledPriority = ((entry.priority - minPriority) / range) * SCALE;
-	insertCell(4, Math.round(scaledPriority));
+	insertCell(Column.PRIORITY.position, Math.round(scaledPriority));
 }
 
 /**
@@ -211,14 +232,14 @@ function enableEditing(title) {
 		cell.appendChild(input);
 	}
 
-	addInput("title", title, 1);
-	addInput("score", entry.score, 2);
-	addInput("time", entry.time, 3);
+	addInput("title", title, Column.TITLE.position);
+	addInput("score", entry.score, Column.SCORE.position);
+	addInput("time", entry.time, Column.TIME.position);
 
 	let acceptButton = document.createElement("button");
 	acceptButton.innerHTML = "Accept";
 	acceptButton.onclick = () => editEntry(entry);
-	let priorityCell = row.children[4];
+	let priorityCell = row.children[Column.PRIORITY.position];
 	priorityCell.innerHTML = "";
 	priorityCell.appendChild(acceptButton);
 }
