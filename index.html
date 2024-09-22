@@ -18,22 +18,24 @@
 		<input type="number" id="add_entry_score" name="score" placeholder="" required>
 		<label>Duration:</label>
 		<input type="number" id="add_entry_duration" name="duration" placeholder="" required>
-		<button type="submit" onclick="addEntry()">Add Entry</button>
+		<button type="submit" onclick="addNewEntry()">Add Entry</button>
 	</div>
 	<table id="dashboard">
 		<thead>
 			<tr>
 				<th><input id="select_all" type="checkbox" onclick="selectAllEntries()"></th>
-				<th onclick="sortEntries('title')">Title</th>
-				<th onclick="sortEntries('score')">Score</th>
-				<th onclick="sortEntries('duration')">Duration</th>
-				<th onclick="sortEntries('priority')">Priority</th>
+				<th onclick="sortRows('title')">Title</th>
+				<th onclick="sortRows('score')">Score</th>
+				<th onclick="sortRows('duration')">Duration</th>
+				<th onclick="sortRows('priority')">Priority</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr style="style: none;"></tr>
 		</tbody>
 	</table>
-	<script src="app.js"></script>
+	<script src="js/entry.js"></script>
+	<script src="js/backlog.js"></script>
+	<script src="js/dashboard.js"></script>
 </body>
 </html>
