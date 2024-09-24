@@ -9,9 +9,6 @@ class Backlog {
 		/** Name of the backlog. @type {string} */
 		this.name = "The General Backlog";
 
-		/** List of entries of the backlog. @type {Obj.<string, Entry>} */
-		this.entries = {};
-
 		/** Sort order of the entries. @type {Obj.<Column, boolean>} */
 		this.sortOrder = {
 			column: Column.PRIORITY,
@@ -26,6 +23,9 @@ class Backlog {
 			min: 0,
 			max: 100,
 		}
+
+		/** List of entries of the backlog. @type {Obj.<string, Entry>} */
+		this.entries = {};
 	}
 
 	/**
@@ -114,7 +114,6 @@ class Backlog {
 	* @param {string} JSON as string.
 	*/
 	loadFromJSON(json) {
-		console.log(json);
 		let rawBacklog = JSON.parse(json);
 
 		for (let property in rawBacklog)
@@ -129,4 +128,63 @@ class Backlog {
 		}
 	}
 
+	/**
+	* Generates a string as CSV from the state of the backlog.
+	*/
+	exportToCSV() {
+		let csv = "name,sortOrder.column,sortOrder.reverse\n";
+		csv += `"${this.name}",${this.sortOrder.column},${this.sortOrder.reverse}\n`
+
+		for (let column in Column) {
+			csv += Column[column] + ","
+		}
+		csv = csv.slice(0, csv.length-1) + '\n';
+
+		for (let key in this.entries) {
+			let entry = this.entries[key];
+			for (let property in entry) {
+				csv += `"${entry[property]}",`
+			}
+			csv = csv.slice(0, csv.length-1) + '\n';
+		}
+		
+		return csv;
+	}
+
+	/**
+	* Loads the backlog from a CSV file.
+	* @param {string} csv Text from a CSV file.
+	*/
+	loadFromCSV(csv) {
+		let lines = csv.split("\n");
+		lines = lines.slice(0, lines.length-1);
+		let settings = {
+			keys: lines[0].split(","),
+			values: lines[1].split(","),
+		}
+
+		for (let i = 0; i < settings.keys.length; i++) {
+			this[settings.keys[i]] = settings.values[i]
+										.slice(1, settings.values[i].length-1);
+		}
+		this.sortOrder.reverse = this.sortOrder.reverse === "true";
+
+		console.log(lines);
+		let entryProperties = lines[2].split(",");
+		for (let i = 3; i < lines.length; i++) {
+			let entry = lines[i].split(",");
+
+			let newEntry = new Entry ("", 0, 1);
+			for (let j = 0; j < entryProperties.length; j++) {
+				newEntry[entryProperties[j]] = entry[j]
+												.slice(1, entry[j].length-1);
+			}
+
+			newEntry.score = parseFloat(newEntry.score);
+			newEntry.duration = parseFloat(newEntry.duration);
+			newEntry.priority = parseFloat(newEntry.priority);
+
+			this.entries[Entry.getId(newEntry.title)] = newEntry;
+		}
+	}
 }

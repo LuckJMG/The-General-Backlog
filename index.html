@@ -12,7 +12,8 @@
 <body>
 	<h1 onclick="changeDashboardName()">The General Backlog</h1>
 	<div id="export_menu">
-		<a id="export_backlog"><button type="submit" onclick="exportBacklog()">Export</button></a>
+		<a id="export_json"><button type="submit" onclick="exportBacklog('json')">Export JSON</button></a>
+		<a id="export_csv"><button type="submit" onclick="exportBacklog('csv')">Export CSV</button></a>
 		<label>Import:</label>
 		<input id="import_backlog" value="" type="file" onchange="importBacklog()">
 	</div>

@@ -273,16 +273,22 @@ function changeDashboardName() {
 }
 
 /**
-* Export backlog as JSON file.
+* Export backlog as JSON or CSV file.
+* @param {string} filtype The type of file to export to.
 */
-function exportBacklog() {
-	let blob = new Blob([JSON.stringify(backlog, null, 2)], { 
-		type: "application/json" 
-	});
+function exportBacklog(filetype) {
+	let blob = filetype === "json" ? 
+		new Blob([JSON.stringify(backlog, null, 2)], { 
+			type: "application/json" 
+		}) : 
+		new Blob([backlog.exportToCSV()], {
+			type: "text/plain"
+		});
 	let url = URL.createObjectURL(blob);
-	let link = document.getElementById("export_backlog");
+	let link = document.getElementById(filetype === "json" ? 
+		"export_json" : "export_csv");
 	link.href = url;
-	link.download = backlog.name + ".json";
+	link.download = backlog.name + (filetype === "json" ? ".json" : ".csv");
 }
 
 /**
@@ -291,8 +297,14 @@ function exportBacklog() {
 async function importBacklog() {
 	let fileInput = document.getElementById("import_backlog");
 	let file = fileInput.files[0];
+	let name = file.name;
 	fileInput.value = '';
-	backlog.loadFromJSON(await file.text());
+	if (name.slice(name.length - 5, name.length) === ".json") {
+		backlog.loadFromJSON(await file.text());
+	}
+	else if (name.slice(name.length - 4, name.length) === ".csv"){
+		backlog.loadFromCSV(await file.text());
+	}
 
 	updateDashboard();
 }
