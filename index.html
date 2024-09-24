@@ -12,8 +12,9 @@
 <body>
 	<h1 onclick="changeDashboardName()">The General Backlog</h1>
 	<div id="export_menu">
-		<input id="import_backlog" type="file" onchange="importBacklog()">
 		<a id="export_backlog"><button type="submit" onclick="exportBacklog()">Export</button></a>
+		<label>Import:</label>
+		<input id="import_backlog" value="" type="file" onchange="importBacklog()">
 	</div>
 	<div id="menu" class="add_entry">
 		<label>Title:</label>

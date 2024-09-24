@@ -1,4 +1,5 @@
 const ROW_ID = "row-";
+
 let backlog = new Backlog();
 let body = document.getElementsByTagName("tbody")[0];
 
@@ -16,6 +17,8 @@ let priorityLimits = {
 	max: 0,
 	min: 0,
 }
+
+loadBacklogCookies();
 
 /**
 * Returns the index of the column in the dashboard.
@@ -42,6 +45,8 @@ function updateDashboard() {
 		backlog.sortOrder.column, 
 		backlog.sortOrder.reverse);
 	entries.map(entry => insertRow(entry));
+
+	document.cookie = JSON.stringify(backlog);
 }
 
 /**
@@ -286,7 +291,38 @@ async function importBacklog() {
 	let file = fileInput.files[0];
 	fileInput.value = '';
 	let rawBacklog = JSON.parse(await file.text());
+
 	for (let property in rawBacklog)
 		backlog[property] = rawBacklog[property];
+
+	for (let key in rawBacklog.entries) {
+		let rawEntry = rawBacklog.entries[key];
+		let newEntry = new Entry("", 0, 1);
+		for (let property in rawEntry)
+			newEntry[property] = rawEntry[property];
+		backlog.entries[key] = newEntry;
+	}
+
+	updateDashboard();
+}
+
+/**
+* Load backlog from cookies.
+*/
+function loadBacklogCookies() {
+	if (document.cookie === "") return;
+	let rawBacklog = JSON.parse(document.cookie);
+
+	for (let property in rawBacklog)
+		backlog[property] = rawBacklog[property];
+
+	for (let key in rawBacklog.entries) {
+		let rawEntry = rawBacklog.entries[key];
+		let newEntry = new Entry("", 0, 1);
+		for (let property in rawEntry)
+			newEntry[property] = rawEntry[property];
+		backlog.entries[key] = newEntry;
+	}
+
 	updateDashboard();
 }
