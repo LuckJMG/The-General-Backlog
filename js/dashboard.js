@@ -30,6 +30,8 @@ function getColumnIndex(column) {
 * Updates the dashboard with the new state.
 */
 function updateDashboard() {
+	document.getElementsByTagName("h1")[0].innerHTML = backlog.name;
+
 	rows.map(row => row.remove());
 	priorityLimits = backlog.getPriorityLimits();
 	priorityLimits.min = priorityLimits.min === priorityLimits.max ? 
@@ -216,8 +218,8 @@ function selectAllEntries() {
 }
 
 /**
-* Sort the rows by the selected colum
-	* @param {Column} column Column to sort by.
+* Sort the rows by the selected colum.
+* @param {Column} column Column to sort by.
 */
 function sortRows(column) {
 	if (column === backlog.sortOrder.column) {
@@ -228,5 +230,63 @@ function sortRows(column) {
 		backlog.sortOrder.reverse = false;
 	}
 
+	updateDashboard();
+}
+
+/**
+* Change the dashboard name.
+*/
+function changeDashboardName() {
+	let nameElement = document.getElementsByTagName("h1")[0];
+	let inline = document.createElement("inline");
+	inline.id = "inline_change_name"
+	nameElement.after(inline);
+	nameElement.remove();
+
+	let input = document.createElement("input");
+	input.value = backlog.name;
+	input.id = "change_backlog_name";
+
+	let button = document.createElement("button");
+	button.innerHTML = "Change Name";
+	button.onclick = () => {
+		let inline = document.getElementById("inline_change_name");
+		let newName = inline.firstChild.value;
+		if (newName === "") return;
+		backlog.name = newName;
+		let h1 = document.createElement("h1");
+		h1.innerHTML = newName;
+		h1.onclick = changeDashboardName;
+		inline.after(h1);
+		inline.remove();
+	}
+
+	inline.appendChild(input);
+	inline.appendChild(button);
+}
+
+/**
+* Export backlog as JSON file.
+*/
+function exportBacklog() {
+	let blob = new Blob([JSON.stringify(backlog, null, 2)], { 
+		type: "application/json" 
+	});
+	let url = URL.createObjectURL(blob);
+	let link = document.getElementById("export_backlog");
+	link.href = url;
+	link.download = backlog.name + ".json";
+}
+
+/**
+* Import backlog with JSON file.
+*/
+async function importBacklog() {
+	let fileInput = document.getElementById("import_backlog");
+	let file = fileInput.files[0];
+	fileInput.value = '';
+	let rawBacklog = JSON.parse(await file.text());
+	for (let property in rawBacklog)
+		backlog[property] = rawBacklog[property];
 	updateDashboard();
 }

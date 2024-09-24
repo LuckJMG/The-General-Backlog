@@ -10,12 +10,16 @@
 	<link rel="icon" href="favicon.png">
 </head>
 <body>
-	<h1>The General Backlog</h1>
+	<h1 onclick="changeDashboardName()">The General Backlog</h1>
+	<div id="export_menu">
+		<input id="import_backlog" type="file" onchange="importBacklog()">
+		<a id="export_backlog"><button type="submit" onclick="exportBacklog()">Export</button></a>
+	</div>
 	<div id="menu" class="add_entry">
 		<label>Title:</label>
 		<input type="text" id="add_entry_title" name="title" placeholder="e.g. Minecraft, Celeste, ..." required>
 		<label>Score:</label>
-		<input type="number" id="add_entry_score" name="score" placeholder="" required>
+		<input type="number" id="add_entry_score" name="score" min="0" max="100" placeholder="" required>
 		<label>Duration:</label>
 		<input type="number" id="add_entry_duration" name="duration" placeholder="" required>
 		<button type="submit" onclick="addNewEntry()">Add Entry</button>
