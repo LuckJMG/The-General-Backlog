@@ -264,10 +264,12 @@ function changeDashboardName() {
 		h1.onclick = changeDashboardName;
 		inline.after(h1);
 		inline.remove();
+		document.cookie = JSON.stringify(backlog);
 	}
 
 	inline.appendChild(input);
 	inline.appendChild(button);
+
 }
 
 /**
@@ -290,18 +292,7 @@ async function importBacklog() {
 	let fileInput = document.getElementById("import_backlog");
 	let file = fileInput.files[0];
 	fileInput.value = '';
-	let rawBacklog = JSON.parse(await file.text());
-
-	for (let property in rawBacklog)
-		backlog[property] = rawBacklog[property];
-
-	for (let key in rawBacklog.entries) {
-		let rawEntry = rawBacklog.entries[key];
-		let newEntry = new Entry("", 0, 1);
-		for (let property in rawEntry)
-			newEntry[property] = rawEntry[property];
-		backlog.entries[key] = newEntry;
-	}
+	backlog.loadFromJSON(await file.text());
 
 	updateDashboard();
 }
@@ -311,18 +302,6 @@ async function importBacklog() {
 */
 function loadBacklogCookies() {
 	if (document.cookie === "") return;
-	let rawBacklog = JSON.parse(document.cookie);
-
-	for (let property in rawBacklog)
-		backlog[property] = rawBacklog[property];
-
-	for (let key in rawBacklog.entries) {
-		let rawEntry = rawBacklog.entries[key];
-		let newEntry = new Entry("", 0, 1);
-		for (let property in rawEntry)
-			newEntry[property] = rawEntry[property];
-		backlog.entries[key] = newEntry;
-	}
-
+	backlog.loadFromJSON(document.cookie);
 	updateDashboard();
 }

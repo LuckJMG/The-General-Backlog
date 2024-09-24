@@ -108,4 +108,25 @@ class Backlog {
 		if (reverse) entries.reverse();
 		return entries;
 	}
+
+	/**
+	* Loads a backlog from JSON.
+	* @param {string} JSON as string.
+	*/
+	loadFromJSON(json) {
+		console.log(json);
+		let rawBacklog = JSON.parse(json);
+
+		for (let property in rawBacklog)
+			this[property] = rawBacklog[property];
+
+		for (let key in rawBacklog.entries) {
+			let rawEntry = rawBacklog.entries[key];
+			let newEntry = new Entry("", 0, 1);
+			for (let property in rawEntry)
+				newEntry[property] = rawEntry[property];
+			this.entries[key] = newEntry;
+		}
+	}
+
 }
