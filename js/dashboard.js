@@ -71,7 +71,7 @@ function insertRow(entry) {
 	checkboxCell.appendChild(checkbox);
 
 	let titleCell = insertCell(Column.TITLE, entry.title);
-	titleCell.onclick = () => enableEditing(entry.title);
+	titleCell.onclick = () => enableEditing(Entry.getId(entry.title));
 
 	insertCell(Column.SCORE, entry.score);
 	insertCell(Column.DURATION, entry.duration);
@@ -146,6 +146,7 @@ function deleteEntries() {
 */
 function enableEditing(entryId) {
 	let row = document.getElementById(ROW_ID + entryId);
+	row.children[1].onclick = "";
 
 	const addInput = (name, value, column) => {
 		let input = document.createElement("input");

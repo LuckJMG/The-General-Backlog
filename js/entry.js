@@ -54,7 +54,7 @@ class Entry {
 	* @returns {string} Unique id of the entry.
 	*/
 	static getId(title) {
-		return title.toLowerCase().replace(" ", "_");
+		return title.toLowerCase().replace(new RegExp(" ", "g"), "_");
 	}
 }
 
