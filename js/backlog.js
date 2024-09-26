@@ -67,7 +67,7 @@ class Backlog {
 	editEntry(entryId, newTitle, newScore, newDuration) {
 		this.entries[entryId].edit(newTitle, newScore, newDuration);
 		this.entries[Entry.getId(newTitle)] = this.entries[entryId];
-		delete this.entries[entryId];
+		if (entryId !== Entry.getId(newTitle)) delete this.entries[entryId];
 	}
 
 	/**
