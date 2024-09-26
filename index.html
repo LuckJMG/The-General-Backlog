@@ -30,16 +30,19 @@
 		<thead>
 			<tr>
 				<th><input id="select_all" type="checkbox" onclick="selectAllEntries()"></th>
-				<th onclick="sortRows('title')">Title</th>
-				<th onclick="sortRows('score')">Score</th>
-				<th onclick="sortRows('duration')">Duration</th>
-				<th onclick="sortRows('priority')">Priority</th>
+				<th id="column-title" onclick="sortRows('title')"><label>Title</label><img src="icons/sort.svg"></th>
+				<th id="column-score" onclick="sortRows('score')"><label>Score</label><img src="icons/sort.svg"></th>
+				<th id="column-duration" onclick="sortRows('duration')"><label>Duration</label><img src="icons/sort.svg"></th>
+				<th id="column-priority" onclick="sortRows('priority')"><label>Priority</label><img src="icons/sort-down.svg"></th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr style="style: none;"></tr>
+			<tr style="display: none;"></tr>
 		</tbody>
 	</table>
+	<footer>
+		<p>Uicons by <a href="https://www.flaticon.com/uicons">Flaticon</a></p>
+	</footer>
 	<script src="js/entry.js"></script>
 	<script src="js/backlog.js"></script>
 	<script src="js/dashboard.js"></script>

@@ -1,0 +1,98 @@
+:root {
+	font-family: Inter var, ui-sans-serif, system-ui, sans-serif, 
+		"Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol, 
+		"Noto Color Emoji";
+}
+
+table {
+	margin: auto;
+	margin-top: 1rem;
+	width: 95%;
+	border: 1px solid rgb(243, 244, 246);
+	border-radius: .375rem;
+	box-shadow: 0 0 #0000, 0 0 #0000,
+		0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
+	border-collapse: collapse;
+}
+
+tr {
+	border-bottom: 1px solid rgb(229, 231, 235);
+}
+
+thead tr {
+	height: 2.5rem;
+
+	& th {
+		text-align: left;
+		padding-left: .25rem;
+		font-size: .9rem;
+		color: rgb(17, 24, 39);
+		cursor: pointer;
+
+		& > * {
+			cursor: pointer;
+		}
+
+		& img {
+			padding-inline: .25rem;
+			width: .6rem;
+		}
+
+		&:hover {
+			background-color: rgb(249, 250, 251);
+		}
+
+		&:first-child {
+			padding: 0;
+			text-align: center;
+			width: 2rem;
+		}
+	}
+}
+
+tbody tr {
+	height: 2rem;
+	border: 1px solid rgb(243, 244, 246);
+
+	& td {
+		color: rgb(55, 65, 81);
+
+		&.number {
+			text-align: right;
+			padding-right: 1rem;
+		}
+
+		&:first-child {
+			padding-left: 0;
+			text-align: center;
+			width: 2rem;
+		}
+
+		&:nth-child(2) {
+			font-weight: 600;
+			cursor: pointer;
+		}
+	}
+
+
+	&:hover {
+		background-color: rgb(249, 250, 251);
+	}
+}
+
+input[type="checkbox"] {
+	height: .9rem;
+    width: .9rem;
+    border-radius: .25rem;
+    border-color: rgb(209, 213, 219);
+    color: rgb(37, 99, 235);
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+    background-origin: border-box;
+    user-select: none;
+    flex-shrink: 0;
+    background-color: #fff;
+    border-width: 1px;
+	cursor: pointer;
+}

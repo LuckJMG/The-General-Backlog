@@ -46,6 +46,23 @@ function updateDashboard() {
 		backlog.sortOrder.reverse);
 	entries.map(entry => insertRow(entry));
 
+	let columnHeaders = [
+		...document.getElementsByTagName("thead")[0].children[0].children
+	];
+	columnHeaders.slice(1, columnHeaders.length).map(
+	column => {
+		if (column.id === "column-" + backlog.sortOrder.column) {
+			let icon = column.children[1];
+			icon.src = "icons/sort-down.svg";
+			icon.style.transform = `scale(${
+				backlog.sortOrder.reverse ? -1 : 1
+			})`;
+
+			return;
+		}
+		column.children[1].src = "icons/sort.svg";
+	});
+
 	document.cookie = JSON.stringify(backlog);
 }
 
@@ -73,8 +90,10 @@ function insertRow(entry) {
 	let titleCell = insertCell(Column.TITLE, entry.title);
 	titleCell.onclick = () => enableEditing(Entry.getId(entry.title));
 
-	insertCell(Column.SCORE, entry.score);
-	insertCell(Column.DURATION, entry.duration);
+	let scoreCell = insertCell(Column.SCORE, entry.score);
+	scoreCell.className = "number";
+	let durationCell = insertCell(Column.DURATION, entry.duration);
+	durationCell.className = "number";
 
 	let priority = entry.priority;
 	let range = priorityLimits.max - priorityLimits.min;
@@ -84,7 +103,8 @@ function insertRow(entry) {
 	let scale = maxScale - minScale;
 	let scaledPriority = (priority - priorityLimits.min) / range;
 	scaledPriority = scaledPriority * scale + minScale;
-	insertCell(Column.PRIORITY, Math.round(scaledPriority));
+	let priorityCell = insertCell(Column.PRIORITY, Math.round(scaledPriority));
+	priorityCell.className = "number";
 }
 
 /**
@@ -173,6 +193,10 @@ function enableEditing(entryId) {
 	priorityCell.appendChild(acceptButton);
 }
 
+/**
+* Edits a row with the inputs given elements.
+* @param {HTMLTableRowElement} row Row to edit.
+*/
 function editRow(row) {
 	let titleInput = row.children[getColumnIndex(Column.TITLE)].firstChild;
 	let newTitle = titleInput.value;
