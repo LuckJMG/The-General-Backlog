@@ -6,17 +6,14 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<meta name="description" content="" />
 	<link href="https://cdn.jsdelivr.net/npm/modern-normalize@/modern-normalize.min.css" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<link rel="icon" href="favicon.png">
 </head>
 <body>
 	<h1 onclick="changeDashboardName()">The General Backlog</h1>
-	<div id="export_menu">
-		<a id="export_json"><button type="submit" onclick="exportBacklog('json')">Export JSON</button></a>
-		<a id="export_csv"><button type="submit" onclick="exportBacklog('csv')">Export CSV</button></a>
-		<label>Import:</label>
-		<input id="import_backlog" value="" type="file" onchange="importBacklog()">
-	</div>
 	<div id="menu" class="add_entry">
 		<label>Title:</label>
 		<input type="text" id="add_entry_title" name="title" placeholder="e.g. Minecraft, Celeste, ..." required>
@@ -25,6 +22,27 @@
 		<label>Duration:</label>
 		<input type="number" id="add_entry_duration" name="duration" placeholder="" required>
 		<button type="submit" onclick="addNewEntry()">Add Entry</button>
+	</div>
+	<div id="menu" class="menu">
+		<div id="export_dropdown" class="dropdown">
+			<button onclick="showDropdown('export_dropdown')"><img src="icons/file-export.svg"><label>Export</label></button>
+			<div class="dropdown-content">
+				<a id="export_json" onclick="exportBacklog('json')">Export as JSON</a>
+				<a id="export_csv" onclick="exportBacklog('csv')">Export as CSV</a>
+			</div>
+		</div>
+		<div id="import_backlog">
+			<button onclick="showDropdown('import_backlog')"><img src="icons/file-import.svg"><label>Import</label></button>
+			<div id="file_drop" class="modal" onclick="document.getElementById('file_drop').classList.toggle('show')">
+				<div class="modal-content" ondragover="event.preventDefault()" ondrop="dropHandler(event)">
+					<p>Drop a .csv or .json backlog save</p>
+					<label><div>or add manually</div> <input id="manual_import_backlog" type="file" onchange="importBacklog()"></label>
+				</div>
+				<div>
+				</div>
+			</div>
+		</div>
+		<button>+ Add Entry</button>
 	</div>
 	<table id="dashboard">
 		<thead>

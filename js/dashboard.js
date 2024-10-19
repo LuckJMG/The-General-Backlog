@@ -317,11 +317,12 @@ function exportBacklog(filetype) {
 }
 
 /**
-* Import backlog with JSON file.
+* Import backlog from extern file.
+* @param {File} [file] File to import.
 */
-async function importBacklog() {
-	let fileInput = document.getElementById("import_backlog");
-	let file = fileInput.files[0];
+async function importBacklog(file=null) {
+	let fileInput = document.getElementById("manual_import_backlog");
+	file = file === null ? fileInput.files[0] : file;
 	let name = file.name;
 	fileInput.value = '';
 	if (name.slice(name.length - 5, name.length) === ".json") {
@@ -335,10 +336,36 @@ async function importBacklog() {
 }
 
 /**
+* Handle drop of file to import.
+* @param {DragEvent} event Drop event.
+*/
+function dropHandler(event) {
+	event.preventDefault();
+
+	if (event.dataTransfer.items) {
+		importBacklog(event.dataTransfer.items[0].getAsFile());
+	}
+	else {
+		importBacklog(event.dataTransfer.files[0]);
+	}
+
+	document.getElementById("import_backlog")
+		.children[1].classList.toggle("show");
+}
+
+/**
 * Load backlog from cookies.
 */
 function loadBacklogCookies() {
 	if (document.cookie === "") return;
 	backlog.loadFromJSON(document.cookie);
 	updateDashboard();
+}
+
+/**
+* Shows a dropdown content.
+* @param {string} dropwdownId ID of dropdown to show content.
+*/
+function showDropdown(dropdownId) {
+	document.getElementById(dropdownId).children[1].classList.toggle("show");
 }
