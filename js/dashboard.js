@@ -3,7 +3,7 @@ const ROW_ID = "row-";
 let backlog = new Backlog();
 let body = document.getElementsByTagName("tbody")[0];
 
-/** Rows of the dashboard. @type {HTMLTableRowElement} */
+/** @type {HTMLTableRowElement} */
 let rows = [];
 let columns = [
 	Column.SELECTION,
@@ -21,17 +21,13 @@ let priorityLimits = {
 loadBacklogCookies();
 
 /**
-* Returns the index of the column in the dashboard.
-* @param {Column} column Column to find its index.
-* @returns {number} Index of the column in the dashboard.
+* @param {Column} column
+* @returns {number}
 */
 function getColumnIndex(column) {
 	return columns.indexOf(column);
 }
 
-/**
-* Updates the dashboard with the new state.
-*/
 function updateDashboard() {
 	document.getElementsByTagName("h1")[0].innerHTML = backlog.name;
 
@@ -67,8 +63,7 @@ function updateDashboard() {
 }
 
 /**
-* Inserts a new row in the dashboard.
-* @param {Entry} Entry to add to the dashboard.
+* @param {Entry} entry
 */
 function insertRow(entry) {
 	let row = body.insertRow(1);
@@ -107,12 +102,7 @@ function insertRow(entry) {
 	priorityCell.className = "number";
 }
 
-/**
-* Gets the input to add a new entry to the backlog and updates
-* the dashboard.
-*/
 function addNewEntry() {
-	// Get values
 	let titleInput = document.getElementById(
 		"add_entry_" + Column.TITLE
 	);
@@ -135,22 +125,16 @@ function addNewEntry() {
 	if (duration === "") return;
 	duration = parseInt(duration);
 
-	// Reset inputs
 	titleInput.value = "";
 	scoreInput.value = "";
 	durationInput.value = "";
 
-	// Add entry to backlog
 	backlog.addEntry(title, score, duration);
 
-	// Update dashboard
 	document.getElementById("add_entry_menu").classList.toggle("show")
 	updateDashboard();
 }
 
-/**
-* Removes the selected entries of the backog and updates the dashboard.
-*/
 function deleteEntries() {
 	rows.map(row => {
 		if (!row.firstChild.firstChild.checked) return;
@@ -162,8 +146,7 @@ function deleteEntries() {
 }
 
 /**
-* Enables the editing of an entry in the dashboard.
-* @param {string} title The title of the entry to enable editing.
+* @param {string} title
 */
 function enableEditing(entryId) {
 	let row = document.getElementById(ROW_ID + entryId);
@@ -195,8 +178,7 @@ function enableEditing(entryId) {
 }
 
 /**
-* Edits a row with the inputs given elements.
-* @param {HTMLTableRowElement} row Row to edit.
+* @param {HTMLTableRowElement} row
 */
 function editRow(row) {
 	let titleInput = row.children[getColumnIndex(Column.TITLE)].firstChild;
@@ -214,9 +196,6 @@ function editRow(row) {
 	updateDashboard();
 }
 
-/**
-* Shows the delete button when a row in the dashboard is selected.
-*/
 function showDeleteButton() {
 	let selected = rows.some(row => {
 		return row.firstChild.firstChild.checked;
@@ -237,9 +216,6 @@ function showDeleteButton() {
 	}
 }
 
-/**
-* Selects all rows on the dashboard.
-*/
 function selectAllEntries() {
 	let isSelected = document.getElementById("select_all").checked;
 	rows.map(row => {
@@ -249,8 +225,7 @@ function selectAllEntries() {
 }
 
 /**
-* Sort the rows by the selected colum.
-* @param {Column} column Column to sort by.
+* @param {Column} column
 */
 function sortRows(column) {
 	if (column === backlog.sortOrder.column) {
@@ -264,9 +239,6 @@ function sortRows(column) {
 	updateDashboard();
 }
 
-/**
-* Change the dashboard name.
-*/
 function changeDashboardName() {
 	let nameElement = document.getElementsByTagName("h1")[0];
 	let inline = document.createElement("inline");
@@ -299,8 +271,7 @@ function changeDashboardName() {
 }
 
 /**
-* Export backlog as JSON or CSV file.
-* @param {string} filtype The type of file to export to.
+* @param {string} filtype
 */
 function exportBacklog(filetype) {
 	let blob = filetype === "json" ? 
@@ -318,8 +289,7 @@ function exportBacklog(filetype) {
 }
 
 /**
-* Import backlog from extern file.
-* @param {File} [file] File to import.
+* @param {File} [file]
 */
 async function importBacklog(file=null) {
 	let fileInput = document.getElementById("manual_import_backlog");
@@ -337,8 +307,7 @@ async function importBacklog(file=null) {
 }
 
 /**
-* Handle drop of file to import.
-* @param {DragEvent} event Drop event.
+* @param {DragEvent} event
 */
 function dropHandler(event) {
 	event.preventDefault();
@@ -354,9 +323,6 @@ function dropHandler(event) {
 		.children[1].classList.toggle("show");
 }
 
-/**
-* Load backlog from cookies.
-*/
 function loadBacklogCookies() {
 	if (document.cookie === "") return;
 	backlog.loadFromJSON(document.cookie);
@@ -364,8 +330,7 @@ function loadBacklogCookies() {
 }
 
 /**
-* Shows a dropdown content.
-* @param {string} dropwdownId ID of dropdown to show content.
+* @param {string} dropwdownId
 */
 function showDropdown(dropdownId) {
 	document.getElementById(dropdownId).children[1].classList.toggle("show");

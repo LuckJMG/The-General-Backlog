@@ -1,22 +1,18 @@
-/*
-* The container of the backlog state.
-*/
 class Backlog {
 	/**
 	* @constructor
 	*/
 	constructor() {
-		/** Name of the backlog. @type {string} */
+		/** @type {string} */
 		this.name = "The General Backlog";
 
-		/** Sort order of the entries. @type {Obj.<Column, boolean>} */
+		/** @type {Obj.<Column, boolean>} */
 		this.sortOrder = {
 			column: Column.PRIORITY,
 			reverse: false,
 		};
 
 		/**
-		* Priority settings.
 		* @type {Obj.<number, number>}
 		*/
 		this.prioritySettings = {
@@ -24,25 +20,23 @@ class Backlog {
 			max: 100,
 		}
 
-		/** List of entries of the backlog. @type {Obj.<string, Entry>} */
+		/** @type {Obj.<string, Entry>} */
 		this.entries = {};
 	}
 
 	/**
-	* Checks if the title exists in the backlog.
-	* @param {string} entryId Id of the entry to check.
-	* @returns {boolean} If the title alerady exists or not.
+	* @param {string} entryId
+	* @returns {boolean}
 	*/
 	includesEntry(entryId) {
 		return this.entries[entryId] !== undefined;
 	}
 
 	/**
-	* Adds an entry to the list of entries.
-	* @param {string} title Title of the new entry.
-	* @param {number} score Score of the new entry.
-	* @param {number} duration Duration of the new entry.
-	* @returns {Entry} New entry created.
+	* @param {string} title
+	* @param {number} score
+	* @param {number} duration
+	* @returns {Entry}
 	*/
 	addEntry(title, score, duration) {
 		let newEntry = new Entry(title, score, duration);
@@ -50,19 +44,17 @@ class Backlog {
 	}
 
 	/**
-	* Removes an entry by its title from the backlog.
-	* @param {string} entryId Id of the entry to remove.
+	* @param {string}
 	*/
 	deleteEntry(entryId) {
 		delete this.entries[entryId];
 	}
 
 	/**
-	* Edits and entry by its title.
-	* @param {string} entryId The id of the entry to edit.
-	* @param {string} newTitle The new title of the entry.
-	* @param {number} newScore The new score of the entry.
-	* @param {number} newDuration The new duration of the entry.
+	* @param {string} entryId
+	* @param {string} newTitle
+	* @param {number} newScore
+	* @param {number} newDuration
 	*/
 	editEntry(entryId, newTitle, newScore, newDuration) {
 		this.entries[entryId].edit(newTitle, newScore, newDuration);
@@ -71,7 +63,6 @@ class Backlog {
 	}
 
 	/**
-	* Returns the max and min priorities of the backlog.
 	* @returns {Obj.<number, number>}
 	*/
 	getPriorityLimits() {
@@ -83,12 +74,11 @@ class Backlog {
 	}
 
 	/**
-	* Sorts the entries by a given column.
 	* @static
-	* @param {Entry[]} entries Entries to sort.
-	* @param {Column} column The column to sort the entries.
-	* @param {boolean} [reverse=false] Flag to reverse the sorted entries.
-	* @returns {Entry[]} Array of sorted entries.
+	* @param {Entry[]}
+	* @param {Column}
+	* @param {boolean} [reverse=false]
+	* @returns {Entry[]}
 	*/
 	static sortEntries(entries, column, reverse=false) {
 		switch(column) {
@@ -110,8 +100,7 @@ class Backlog {
 	}
 
 	/**
-	* Loads a backlog from JSON.
-	* @param {string} JSON as string.
+	* @param {string} json
 	*/
 	loadFromJSON(json) {
 		let rawBacklog = JSON.parse(json);
@@ -128,9 +117,6 @@ class Backlog {
 		}
 	}
 
-	/**
-	* Generates a string as CSV from the state of the backlog.
-	*/
 	exportToCSV() {
 		let csv = "name,sortOrder.column,sortOrder.reverse\n";
 		csv += `"${this.name}",${this.sortOrder.column},${this.sortOrder.reverse}\n`
@@ -152,8 +138,7 @@ class Backlog {
 	}
 
 	/**
-	* Loads the backlog from a CSV file.
-	* @param {string} csv Text from a CSV file.
+	* @param {string} csv
 	*/
 	loadFromCSV(csv) {
 		let lines = csv.split("\n");
