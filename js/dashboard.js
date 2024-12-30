@@ -144,6 +144,7 @@ function addNewEntry() {
 	backlog.addEntry(title, score, duration);
 
 	// Update dashboard
+	document.getElementById("add_entry_menu").classList.toggle("show")
 	updateDashboard();
 }
 

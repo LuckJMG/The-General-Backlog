@@ -23,38 +23,103 @@
 	& .modal-content {
 		background-color: rgb(255 255 255);
 		margin: 10% auto;
-		height: 50%;
-		width: 50%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		align-content: center;
 		border-radius: .375rem;
 
-		& p {
-			margin: auto;
-			text-align: center;
-			font-weight: 500;
-			font-size: 1.5rem;
-		}
-
-		& label {
+		& .modal-parallel {
 			display: flex;
-			align-items: center;
-			align-content: center;
-			justify-content: space-around;
-			padding-bottom: .5rem;
+			justify-content: space-between;
 
-			& input {
-				padding-left: 1rem;
-				width: 12rem;
-				align-self: flex-end;
+			> *:first-child {
+				margin-right: .25rem;
+				
+				& input {
+					width: 97%;
+				}
+			}
+
+			> *:last-child {
+				margin-left: .25rem;
+
+				& input {
+					width: 95.5%;
+				}
 			}
 		}
+	}
+}
 
-		&:hover {
-			background-color: rgb(243, 244, 246);
+.modal-row {
+	width: 100%;
+}
+
+.import-menu {
+	height: 50%;
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	align-content: center;
+
+	& p {
+		margin: auto;
+		text-align: center;
+		font-weight: 500;
+		font-size: 1.5rem;
+	}
+
+	& label {
+		display: flex;
+		align-items: center;
+		align-content: center;
+		justify-content: space-around;
+		padding-bottom: .5rem;
+
+		& input {
+			padding-left: 1rem;
+			width: 12rem;
+			align-self: flex-end;
 		}
+	}
+
+	&:hover {
+		background-color: rgb(243, 244, 246);
+	}
+}
+
+.add-entry-menu {
+	width: 50%;
+	height: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 1rem;
+
+	& h2 {
+		font-size: 1.25rem;
+		line-height: 1.75rem;
+		margin-top: 0;
+		margin-bottom: 1rem;
+	}
+
+	& label {
+		margin-bottom: .25rem;
+		display: block;
+		font-size: .875rem;
+		line-height: 1.25rem;
+		font-weight: 500;
+		color: rgb(55 65 81);
+	}
+
+	& input {
+		width: 98%;
+		font-size: .875rem;
+		line-height: 1.25rem;
+		margin-bottom: .5rem;
+	}
+
+	> *:last-child {
+		margin-top: 1.5rem;
+		width: 100%;
 	}
 }
 
@@ -102,52 +167,57 @@
 	width: 95%;
 
 	& button {
-		display: inline-flex;
-		border-radius: .375rem;
-		justify-content: center;
-		align-items: center;
-		height: 2.25rem;
-		cursor: pointer;
-		background-color: rgb(255, 255, 255);
-		border-style: solid;
-		border-width: 1px;
-		border-color: rgb(209, 213, 219);
-		box-shadow: 0 0 #0000, 0 0 #0000, 
-			0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
-		margin-right: .75rem;
-		padding: .75rem .5rem;
-		font-family: Inter, sans-serif;
-		font-weight: 600;
-		font-size: .875rem;
-
 		& img {
 			width: 1rem;
 			margin-right: .5rem;
 		}
-
-		& label {
-			cursor: pointer;
-		}
-
-		&:last-child {
-			border-width: 0;
-			margin-left: auto;
-			margin-right: 0;
-			background-color: rgb(37, 99, 235);
-			color: rgb(255, 255, 255);
-
-			&:hover {
-				color: white;
-				background-color: #2563ebe6;
-			}
-		}
-
-		&:hover {
-			color: rgb(17, 24, 39);
-			background-color: rgb(243, 244, 246);
-		}
 	}
 
+	> *:last-child {
+		margin-left: auto;
+	}
+}
+
+button {
+	display: inline-flex;
+	border-radius: .375rem;
+	justify-content: center;
+	align-items: center;
+	height: 2.25rem;
+	cursor: pointer;
+	background-color: rgb(255, 255, 255);
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(209, 213, 219);
+	box-shadow: 0 0 #0000, 0 0 #0000, 
+		0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
+	margin-right: .75rem;
+	padding: .75rem .5rem;
+	font-family: Inter, sans-serif;
+	font-weight: 600;
+	font-size: .875rem;
+
+	& label {
+		cursor: pointer;
+	}
+
+	&:hover {
+		color: rgb(17, 24, 39);
+		background-color: rgb(243, 244, 246);
+	}
+}
+
+.primary-button {
+	border-width: 0;
+	margin-left: auto;
+	margin-right: 0;
+	background-color: rgb(37, 99, 235);
+	color: rgb(255, 255, 255);
+
+	&:hover {
+		color: white;
+		background-color: #2563ebe6;
+	}
 }
 
 table {
@@ -175,6 +245,11 @@ thead tr {
 		color: rgb(17, 24, 39);
 		cursor: pointer;
 
+		&.number {
+			text-align: center;
+			vertical-align: middle;
+		}
+
 		& > * {
 			cursor: pointer;
 		}
@@ -182,6 +257,7 @@ thead tr {
 		& img {
 			padding-inline: .25rem;
 			width: .6rem;
+			vertical-align: middle;
 		}
 
 		&:hover {
@@ -204,8 +280,7 @@ tbody tr {
 		color: rgb(55, 65, 81);
 
 		&.number {
-			text-align: right;
-			padding-right: 1rem;
+			text-align: center;
 		}
 
 		&:first-child {

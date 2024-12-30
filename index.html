@@ -14,15 +14,6 @@
 </head>
 <body>
 	<h1 onclick="changeDashboardName()">The General Backlog</h1>
-	<div id="menu" class="add_entry">
-		<label>Title:</label>
-		<input type="text" id="add_entry_title" name="title" placeholder="e.g. Minecraft, Celeste, ..." required>
-		<label>Score:</label>
-		<input type="number" id="add_entry_score" name="score" min="0" max="100" placeholder="" required>
-		<label>Duration:</label>
-		<input type="number" id="add_entry_duration" name="duration" placeholder="" required>
-		<button type="submit" onclick="addNewEntry()">Add Entry</button>
-	</div>
 	<div id="menu" class="menu">
 		<div id="export_dropdown" class="dropdown">
 			<button onclick="showDropdown('export_dropdown')"><img src="icons/file-export.svg"><label>Export</label></button>
@@ -34,24 +25,44 @@
 		<div id="import_backlog">
 			<button onclick="showDropdown('import_backlog')"><img src="icons/file-import.svg"><label>Import</label></button>
 			<div id="file_drop" class="modal" onclick="document.getElementById('file_drop').classList.toggle('show')">
-				<div class="modal-content" ondragover="event.preventDefault()" ondrop="dropHandler(event)">
+				<div class="modal-content import-menu" onclick="event.stopPropagation()" ondragover="event.preventDefault()" ondrop="dropHandler(event)">
 					<p>Drop a .csv or .json backlog save</p>
 					<label><div>or add manually</div> <input id="manual_import_backlog" type="file" onchange="importBacklog()"></label>
 				</div>
-				<div>
+			</div>
+		</div>
+		<div id="add_entry">
+			<button class="primary-button" onclick="showDropdown('add_entry')">+ Add Entry</button>
+			<div id="add_entry_menu" class="modal" onclick="document.getElementById('add_entry_menu').classList.toggle('show')">
+				<div class="modal-content add-entry-menu" onclick="event.stopPropagation()">
+					<h2>New Entry</h2>
+					<div class="modal-row">
+						<label>Title</label>
+						<input type="text" id="add_entry_title" name="title" placeholder="e.g. Minecraft, Celeste, ..." required>
+					</div>
+					<div class="modal-row modal-parallel">
+						<div class="modal-row">
+							<label>Score</label>
+							<input type="number" id="add_entry_score" name="score" min="0" max="100" placeholder="" required>
+						</div>
+						<div class="modal-row">
+							<label>Duration</label>
+							<input type="number" id="add_entry_duration" name="duration" placeholder="" required>
+						</div>
+					</div>
+					<button class="primary-button" type="submit" onclick="addNewEntry()">Add Entry</button>
 				</div>
 			</div>
 		</div>
-		<button>+ Add Entry</button>
 	</div>
 	<table id="dashboard">
 		<thead>
 			<tr>
 				<th><input id="select_all" type="checkbox" onclick="selectAllEntries()"></th>
 				<th id="column-title" onclick="sortRows('title')"><label>Title</label><img src="icons/sort.svg"></th>
-				<th id="column-score" onclick="sortRows('score')"><label>Score</label><img src="icons/sort.svg"></th>
-				<th id="column-duration" onclick="sortRows('duration')"><label>Duration</label><img src="icons/sort.svg"></th>
-				<th id="column-priority" onclick="sortRows('priority')"><label>Priority</label><img src="icons/sort-down.svg"></th>
+				<th class="number" id="column-score" onclick="sortRows('score')"><label>Score</label><img src="icons/sort.svg"></th>
+				<th class="number" id="column-duration" onclick="sortRows('duration')"><label>Duration</label><img src="icons/sort.svg"></th>
+				<th class="number" id="column-priority" onclick="sortRows('priority')"><label>Priority</label><img src="icons/sort-down.svg"></th>
 			</tr>
 		</thead>
 		<tbody>
