@@ -8,6 +8,10 @@
 	display: block !important;
 }
 
+.show-inline-flex {
+	display: inline-flex !important;
+}
+
 .modal {
 	display: none;
 	position: fixed;
@@ -275,6 +279,7 @@ thead tr {
 tbody tr {
 	height: 2rem;
 	border: 1px solid rgb(243, 244, 246);
+	position: relative;
 
 	& td {
 		color: rgb(55, 65, 81);
@@ -298,6 +303,42 @@ tbody tr {
 
 	&:hover {
 		background-color: rgb(249, 250, 251);
+	}
+}
+
+.hover-menu {
+	display: none;
+	position: absolute;
+	top: -1rem;
+	right: .5rem;
+	background-color: rgb(255, 255, 255);
+	border-radius: .375rem;
+	border-style: solid;
+	border-width: 1px;
+	border-color: rgb(209, 213, 219);
+	box-shadow: 0 0 #0000, 0 0 #0000, 
+		0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
+
+	& button {
+		margin: 0;
+		margin-inline: .1rem;
+		height: 1.75rem;
+		border: 0;
+		box-shadow: none;
+
+		& img {
+			width: .9rem;
+			filter: brightness(0) saturate(100%) invert(47%) sepia(6%) saturate(914%) hue-rotate(182deg) brightness(92%) contrast(89%);
+		}
+
+		&:hover img {
+			filter: brightness(0) saturate(100%)
+		}
+		
+	}
+
+	& > button:last-child:hover img {
+		filter: brightness(0) saturate(100%) invert(49%) sepia(36%) saturate(748%) hue-rotate(314deg) brightness(108%) contrast(97%);
 	}
 }
 

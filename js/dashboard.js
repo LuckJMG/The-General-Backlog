@@ -31,16 +31,11 @@ function getColumnIndex(column) {
 function updateDashboard() {
 	document.getElementsByTagName("h1")[0].innerHTML = backlog.name;
 
-	rows.map(row => row.remove());
 	priorityLimits = backlog.getPriorityLimits();
 	priorityLimits.min = priorityLimits.min === priorityLimits.max ? 
 		0 : priorityLimits.min;
 
-	let entries = Object.values(backlog.entries);
-	entries = Backlog.sortEntries(entries, 
-		backlog.sortOrder.column, 
-		backlog.sortOrder.reverse);
-	entries.map(entry => insertRow(entry));
+	updateRows();
 
 	let columnHeaders = [
 		...document.getElementsByTagName("thead")[0].children[0].children
@@ -60,6 +55,15 @@ function updateDashboard() {
 	});
 
 	document.cookie = JSON.stringify(backlog);
+}
+
+function updateRows() {
+	rows.map(row => row.remove());
+	let entries = Object.values(backlog.entries);
+	entries = Backlog.sortEntries(entries,
+		backlog.sortOrder.column,
+		backlog.sortOrder.reverse);
+	entries.map(entry => insertRow(entry));
 }
 
 /**
@@ -100,6 +104,32 @@ function insertRow(entry) {
 	scaledPriority = scaledPriority * scale + minScale;
 	let priorityCell = insertCell(Column.PRIORITY, Math.round(scaledPriority));
 	priorityCell.className = "number";
+
+	appendHoverMenu(row, Entry.getId(entry.title))
+}
+
+function appendHoverMenu(row, entryId) {
+	const toggleHoverMenu = () => {
+		let hoverMenu = document.getElementById(`hover_menu_${entryId}`);
+		hoverMenu.classList.toggle('show-inline-flex');
+	}
+
+	let hoverMenu = createHoverMenu(entryId);
+	row.appendChild(hoverMenu);
+	row.onmouseover = toggleHoverMenu;
+	row.onmouseout = toggleHoverMenu;
+}
+
+function createHoverMenu(entryId) {
+	const HOVER_MENU_ELEMENT = `
+	<button class="hover-button" onclick="showEditMenu('${entryId}')"><img src="icons/file-edit.svg"></button>
+	<button class="hover-button" onclick="showDeleteWarning('${entryId}')"><img src="icons/trash.svg"></button>
+	`;
+	let hoverMenu = document.createElement('div');
+	hoverMenu.classList = "hover-menu";
+	hoverMenu.id = `hover_menu_${entryId}`;
+	hoverMenu.innerHTML = HOVER_MENU_ELEMENT.trim();
+	return hoverMenu;
 }
 
 function addNewEntry() {
