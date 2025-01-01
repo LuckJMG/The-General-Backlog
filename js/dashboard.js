@@ -1,4 +1,5 @@
-const ROW_ID = "row-";
+const ROW_ID = "row_";
+const COLUMN_ID = "column_";
 
 let backlog = new Backlog();
 let body = document.getElementsByTagName("tbody")[0];
@@ -29,32 +30,21 @@ function getColumnIndex(column) {
 }
 
 function updateDashboard() {
-	document.getElementsByTagName("h1")[0].innerHTML = backlog.name;
+	setDashboardName();
+	setPriorityLimits();
+	setColumnHeaders();
+	updateRows();
+	updateCookies();
+}
 
+function setDashboardName() {
+	document.getElementById("dashboard_name").innerHTML = backlog.name;
+}
+
+function setPriorityLimits() {
 	priorityLimits = backlog.getPriorityLimits();
 	priorityLimits.min = priorityLimits.min === priorityLimits.max ? 
 		0 : priorityLimits.min;
-
-	updateRows();
-
-	let columnHeaders = [
-		...document.getElementsByTagName("thead")[0].children[0].children
-	];
-	columnHeaders.slice(1, columnHeaders.length).map(
-	column => {
-		if (column.id === "column-" + backlog.sortOrder.column) {
-			let icon = column.children[1];
-			icon.src = "icons/sort-down.svg";
-			icon.style.transform = `scale(${
-				backlog.sortOrder.reverse ? -1 : 1
-			})`;
-
-			return;
-		}
-		column.children[1].src = "icons/sort.svg";
-	});
-
-	document.cookie = JSON.stringify(backlog);
 }
 
 function updateRows() {
@@ -64,6 +54,30 @@ function updateRows() {
 		backlog.sortOrder.column,
 		backlog.sortOrder.reverse);
 	entries.map(entry => insertRow(entry));
+}
+
+function setColumnHeaders() {
+	let columnHeaders = document.getElementById(`${ROW_ID}headers`).children
+	columnHeaders = [...columnHeaders];
+	columnHeaders = columnHeaders.slice(1, columnHeaders.length);
+	columnHeaders.map(column => setColumnSortIcon(column));
+}
+
+function setColumnSortIcon(column) {
+	if (column.id === COLUMN_ID + backlog.sortOrder.column) {
+		let icon = column.children[1];
+		icon.src = "icons/sort-down.svg";
+		icon.style.transform = `scale(${
+			backlog.sortOrder.reverse ? -1 : 1
+		})`;
+
+		return;
+	}
+	column.children[1].src = "icons/sort.svg";
+}
+
+function updateCookies() {
+	document.cookie = JSON.stringify(backlog);
 }
 
 /**
