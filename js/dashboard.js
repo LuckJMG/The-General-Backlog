@@ -124,9 +124,8 @@ function insertRow(entry) {
 
 function appendHoverMenu(row, entryId) {
 	const toggleHoverMenu = () => {
-		let hoverMenu = document.getElementById(`hover_menu_${entryId}`);
-		hoverMenu.classList.toggle('show-inline-flex');
-	}
+		toggleHidden(`hover_menu_${entryId}`);
+	};
 
 	let hoverMenu = createHoverMenu(entryId);
 	row.appendChild(hoverMenu);
@@ -140,7 +139,7 @@ function createHoverMenu(entryId) {
 	<button class="hover-button" onclick="showDeleteWarning('${entryId}')"><img src="icons/trash.svg"></button>
 	`;
 	let hoverMenu = document.createElement('div');
-	hoverMenu.classList = "hover-menu";
+	hoverMenu.classList = "hover-menu hidden";
 	hoverMenu.id = `hover_menu_${entryId}`;
 	hoverMenu.innerHTML = HOVER_MENU_ELEMENT.trim();
 	return hoverMenu;
@@ -175,7 +174,7 @@ function addNewEntry() {
 
 	backlog.addEntry(title, score, duration);
 
-	document.getElementById("add_entry_menu").classList.toggle("show")
+	toggleHidden("add_entry_menu");
 	updateDashboard();
 }
 
@@ -336,18 +335,23 @@ function exportBacklog(filetype) {
 * @param {File} [file]
 */
 async function importBacklog(file=null) {
-	let fileInput = document.getElementById("manual_import_backlog");
-	file = file === null ? fileInput.files[0] : file;
-	let name = file.name;
-	fileInput.value = '';
-	if (name.slice(name.length - 5, name.length) === ".json") {
-		backlog.loadFromJSON(await file.text());
-	}
-	else if (name.slice(name.length - 4, name.length) === ".csv"){
-		backlog.loadFromCSV(await file.text());
-	}
-
+	file = file === null ? getFileFromInput("import_menu_input") : file;
+	await backlog.loadFromFile(file);
+	toggleHidden("import_menu");
 	updateDashboard();
+}
+
+function getFileFromInput(id) {
+	let fileInput = document.getElementById(id);
+	let file = fileInput.files[0];
+	fileInput.value = '';
+	return file;
+}
+
+function getFileExtension(fileName) {
+	let extensionIndex = fileName.lastIndexOf(".");
+	let extension = fileName.slice(extensionIndex);
+	return extension;
 }
 
 /**
@@ -362,9 +366,6 @@ function dropHandler(event) {
 	else {
 		importBacklog(event.dataTransfer.files[0]);
 	}
-
-	document.getElementById("import_backlog")
-		.children[1].classList.toggle("show");
 }
 
 function loadBacklogCookies() {
@@ -373,9 +374,6 @@ function loadBacklogCookies() {
 	updateDashboard();
 }
 
-/**
-* @param {string} dropwdownId
-*/
-function showDropdown(dropdownId) {
-	document.getElementById(dropdownId).children[1].classList.toggle("show");
+function toggleHidden(id) {
+	document.getElementById(id).classList.toggle("hidden");
 }

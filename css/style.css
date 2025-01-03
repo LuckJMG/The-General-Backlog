@@ -4,16 +4,11 @@
 		"Noto Color Emoji";
 }
 
-.show {
-	display: block !important;
-}
-
-.show-inline-flex {
-	display: inline-flex !important;
+.hidden {
+	display: none !important;
 }
 
 .modal {
-	display: none;
 	position: fixed;
 	z-index: 10;
 	left: 0;
@@ -133,7 +128,6 @@
 
 	& .dropdown-content {
 		box-sizing: border-box;
-		display: none;
 		position: absolute;
 		width: 10rem;
 		z-index: 1;
@@ -307,7 +301,7 @@ tbody tr {
 }
 
 .hover-menu {
-	display: none;
+	display: inline-flex;
 	position: absolute;
 	top: -1rem;
 	right: .5rem;

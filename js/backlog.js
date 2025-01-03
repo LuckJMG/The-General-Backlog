@@ -99,24 +99,6 @@ class Backlog {
 		return entries;
 	}
 
-	/**
-	* @param {string} json
-	*/
-	loadFromJSON(json) {
-		let rawBacklog = JSON.parse(json);
-
-		for (let property in rawBacklog)
-			this[property] = rawBacklog[property];
-
-		for (let key in rawBacklog.entries) {
-			let rawEntry = rawBacklog.entries[key];
-			let newEntry = new Entry("", 0, 1);
-			for (let property in rawEntry)
-				newEntry[property] = rawEntry[property];
-			this.entries[key] = newEntry;
-		}
-	}
-
 	exportToCSV() {
 		let csv = "name,sortOrder.column,sortOrder.reverse\n";
 		csv += `"${this.name}",${this.sortOrder.column},${this.sortOrder.reverse}\n`
@@ -137,6 +119,34 @@ class Backlog {
 		return csv;
 	}
 
+	async loadFromFile(file) {
+		let extension = getFileExtension(file.name);
+		if (extension === ".json") {
+			this.loadFromJSON(await file.text());
+		}
+		else if (extension === ".csv") {
+			this.loadFromCSV(await file.text());
+		}
+	}
+
+	/**
+	* @param {string} json
+	*/
+	loadFromJSON(json) {
+		let rawBacklog = JSON.parse(json);
+
+		for (let property in rawBacklog)
+			this[property] = rawBacklog[property];
+
+		for (let key in rawBacklog.entries) {
+			let rawEntry = rawBacklog.entries[key];
+			let newEntry = new Entry("", 0, 1);
+			for (let property in rawEntry)
+				newEntry[property] = rawEntry[property];
+			this.entries[key] = newEntry;
+		}
+	}
+
 	/**
 	* @param {string} csv
 	*/
@@ -154,7 +164,6 @@ class Backlog {
 		}
 		this.sortOrder.reverse = this.sortOrder.reverse === "true";
 
-		console.log(lines);
 		let entryProperties = lines[2].split(",");
 		for (let i = 3; i < lines.length; i++) {
 			let entry = lines[i].split(",");
