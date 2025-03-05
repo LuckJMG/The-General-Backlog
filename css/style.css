@@ -2,6 +2,13 @@
 	font-family: "Inter", ui-sans-serif, system-ui, sans-serif, 
 		"Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol, 
 		"Noto Color Emoji";
+	--background-color: rgb(255, 255, 255);
+	--hover-background-color: rgb(243, 244, 246);
+	--foreground-color: rgb(3, 7, 18);
+	--border-color: rgb(209, 213, 219);
+	--secondary-text-color: rgb(55, 65, 81);
+	--primary-color: rgb(37, 99, 235);
+	--hover-primary-color: rgb(21, 85, 226);
 }
 
 .hidden {
@@ -20,7 +27,7 @@
 	background-color: rgba(0,0,0,0.4);
 
 	& .modal-content {
-		background-color: rgb(255 255 255);
+		background-color: var(--background-color);
 		margin: 10% auto;
 		border-radius: .375rem;
 
@@ -81,7 +88,7 @@
 	}
 
 	&:hover {
-		background-color: rgb(243, 244, 246);
+		background-color: var(--hover-background-color);
 	}
 }
 
@@ -106,7 +113,7 @@
 		font-size: .875rem;
 		line-height: 1.25rem;
 		font-weight: 500;
-		color: rgb(55 65 81);
+		color: var(--secondary-text-color);
 	}
 
 	& input {
@@ -134,13 +141,13 @@
 		box-shadow: 0 0 #0000, 0 0 #0000, 
 		0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);
 		padding: .25rem;
-		background-color: rgb(255 255 255);
+		background-color: var(--background-color);
 		border-width: 1px;
 		border-radius: .375rem;
 
 		& a {
 			font-size: 1rem;
-			color: rgb(3 7 18);
+			color: var(--foreground-color);
 			text-decoration: none;
 			display: block;
 			line-height: 1.25rem;
@@ -153,7 +160,7 @@
 			font-weight: 500;
 
 			&:hover {
-				background-color: rgb(243, 244, 246);
+				background-color: var(--hover-background-color);
 			}
 		}
 	}
@@ -183,10 +190,10 @@ button {
 	align-items: center;
 	height: 2.25rem;
 	cursor: pointer;
-	background-color: rgb(255, 255, 255);
+	background-color: var(--background-color);
 	border-style: solid;
 	border-width: 1px;
-	border-color: rgb(209, 213, 219);
+	border-color: var(--border-color);
 	box-shadow: 0 0 #0000, 0 0 #0000, 
 		0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
 	margin-right: .75rem;
@@ -200,8 +207,7 @@ button {
 	}
 
 	&:hover {
-		color: rgb(17, 24, 39);
-		background-color: rgb(243, 244, 246);
+		background-color: var(--hover-background-color);
 	}
 }
 
@@ -209,12 +215,11 @@ button {
 	border-width: 0;
 	margin-left: auto;
 	margin-right: 0;
-	background-color: rgb(37, 99, 235);
-	color: rgb(255, 255, 255);
+	background-color: var(--primary-color);
+	color: var(--background-color);
 
 	&:hover {
-		color: white;
-		background-color: #2563ebe6;
+		background-color: var(--hover-primary-color);
 	}
 }
 
@@ -259,7 +264,7 @@ thead tr {
 		}
 
 		&:hover {
-			background-color: rgb(249, 250, 251);
+			background-color: var(--hover-background-color);
 		}
 
 		&:first-child {
@@ -305,11 +310,11 @@ tbody tr {
 	position: absolute;
 	top: -1rem;
 	right: .5rem;
-	background-color: rgb(255, 255, 255);
+	background-color: var(--background-color);
 	border-radius: .375rem;
 	border-style: solid;
 	border-width: 1px;
-	border-color: rgb(209, 213, 219);
+	border-color: var(--border-color);
 	box-shadow: 0 0 #0000, 0 0 #0000, 
 		0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
 
@@ -340,15 +345,15 @@ input[type="checkbox"] {
 	height: .9rem;
     width: .9rem;
     border-radius: .25rem;
-    border-color: rgb(209, 213, 219);
-    color: rgb(37, 99, 235);
+    border-color: var(--border-color);
+    color: var(--primary-color);
     padding: 0;
     display: inline-block;
     vertical-align: middle;
     background-origin: border-box;
     user-select: none;
     flex-shrink: 0;
-    background-color: #fff;
+    background-color: var(--background-color);
     border-width: 1px;
 	cursor: pointer;
 }

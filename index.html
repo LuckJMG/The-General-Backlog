@@ -70,7 +70,16 @@
 		</tbody>
 	</table>
 	<div id="entry_delete_warning" class="modal hidden">
-		<div class="modal-content"></div>
+		<div class="modal-content">
+			<div class="modal-limit">
+				<h3>Are you sure?</h3>
+				<p>This action cannot be undone. If you are looking to change the contents of the entry, you can use the edit button instead.</p>
+			</div>
+			<div class="modal-limit">
+				<button onclick="toggleHidden('entry_delete_warning')">Cancel</button>
+				<button onclick="deleteEntry('id')">Delete</button>
+			</div>
+		</div>
 	</div>
 	<footer>
 		<p>Uicons by <a href="https://www.flaticon.com/uicons">Flaticon</a></p>

@@ -1,0 +1,5 @@
+name,sortOrder.column,sortOrder.reverse
+"fucking",title,false
+title,score,duration,priority
+"a","1","2","0.5"
+"b","2","1","2"
