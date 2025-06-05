@@ -2,17 +2,14 @@
 	import {
 		getCoreRowModel,
 		getSortedRowModel,
-		type SortingState
 	} from "@tanstack/table-core";
 	import { columns } from "./columns";
-	import { entries, getSortingFromCookies } from "$lib/dashboard.svelte";
+	import { entries, sorting, updateCookies } from "$lib/dashboard.svelte";
 	import {
 		createSvelteTable,
 		FlexRender,
 	} from "$lib/components/ui/data-table/index.js";
 	import * as Table from "$lib/components/ui/table/index.js";
-
-	let sorting = $state<SortingState>(getSortingFromCookies());
 
 	const table = createSvelteTable({
 		get data() {
@@ -22,13 +19,10 @@
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		onSortingChange: (updater) => {
-			if (typeof updater === "function") {
-				sorting = updater(sorting);
-			} else {
-				sorting = updater;
-			}
-
-			document.cookie = `sorting=${encodeURIComponent(JSON.stringify(sorting))}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Strict`;
+			let newSorting = typeof updater === "function" ?
+				updater(sorting) : updater;
+			sorting[0] = newSorting[0];
+			updateCookies();
 		},
 		state: {
 			get sorting() {

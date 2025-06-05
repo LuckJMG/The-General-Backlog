@@ -2,14 +2,12 @@ import { parse, serialize } from "cookie";
 import { Entry } from "./entry";
 import type { SortingState } from "@tanstack/table-core";
 
-export const entries: Entry[] = $state(getEntriesFromCookies());
-
 export enum Column {
 	TITLE = 'Title',
 	SCORE = 'Score',
 	DURATION = 'Duration',
 	PRIORITY = 'Priority',
-}
+};
 
 export const columnKeyMap: Record<Column, keyof Entry> = {
 	[Column.TITLE]: "title",
@@ -18,39 +16,43 @@ export const columnKeyMap: Record<Column, keyof Entry> = {
 	[Column.PRIORITY]: "priority",
 };
 
+const defaultSorting: SortingState = [{
+	desc: true,
+	id: "priority",
+}];
+
 export function updateCookies() {
-	try {
-		document.cookie = serialize("entries", JSON.stringify(entries), {
+	const cookieConfig = (label: string, data: any) => serialize(
+		label,
+		JSON.stringify(data),
+		{
 			path: "/",
 			sameSite: "strict",
-			maxAge: 60 * 60 * 24 * 30, // 30 days
-		});
+			maxAge: 60 * 60 * 24 * 30,
+		}
+	);
+
+	try {
+		document.cookie = cookieConfig("entries", entries);
+		document.cookie = cookieConfig("sorting", sorting);
 	} catch (err) {
 		console.error("Failed to save entries to cookies:", err);
 	}
 }
 
-function getEntriesFromCookies() {
-	let entries: Entry[] = [];
-
+export function getCookies(): { entries: Entry[], sorting: SortingState } {
 	try {
 		let cookies = parse(document.cookie);
-		if (cookies.entries) entries = JSON.parse(cookies.entries);
+		let entries = cookies.entries ? JSON.parse(cookies.entries) : [];
+		let sorting = cookies.sorting ? JSON.parse(cookies.sorting) : defaultSorting;
+		return { entries, sorting };
 	}
 	catch (err) {
 		console.warn("Could not parse entries from cookies:", err);
+		return { entries: [], sorting: defaultSorting };
 	}
-
-	return entries
 }
 
-export function getSortingFromCookies(): SortingState {
-	try {
-		const match = document.cookie.match(/(?:^|;\s*)sorting=([^;]*)/);
-		if (match && match[1]) return JSON.parse(decodeURIComponent(match[1]));
-	} catch (e) {
-		console.warn("Failed to parse sorting from cookies", e);
-	}
-
-	return [];
-}
+const cookies = getCookies();
+export const entries: Entry[] = $state(cookies.entries);
+export const sorting: SortingState = $state(cookies.sorting);
