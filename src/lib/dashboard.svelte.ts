@@ -44,12 +44,12 @@ export function getCookies(): { entries: Entry[], sorting: SortingState } {
 	try {
 		let cookies = parse(document.cookie);
 		let entries = cookies.entries ? JSON.parse(cookies.entries) : [];
-		let sorting = cookies.sorting ? JSON.parse(cookies.sorting) : defaultSorting;
+		let sorting = cookies.sorting ? JSON.parse(cookies.sorting) : [...defaultSorting];
 		return { entries, sorting };
 	}
 	catch (err) {
 		console.warn("Could not parse entries from cookies:", err);
-		return { entries: [], sorting: defaultSorting };
+		return { entries: [], sorting: [...defaultSorting] };
 	}
 }
 

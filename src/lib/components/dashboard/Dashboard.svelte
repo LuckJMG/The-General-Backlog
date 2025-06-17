@@ -21,7 +21,10 @@
 		onSortingChange: (updater) => {
 			let newSorting = typeof updater === "function" ?
 				updater(sorting) : updater;
-			sorting[0] = newSorting[0];
+
+			if (newSorting.length !== 0) sorting[0] = newSorting[0];
+			else sorting.pop();
+
 			updateCookies();
 		},
 		state: {
