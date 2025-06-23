@@ -15,7 +15,7 @@
     import { Button } from "../ui/button";
 
 	let stableData = $derived([...entries]);
-	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5});
+	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 20 });
 
 	const table = createSvelteTable({
 		get data() {
