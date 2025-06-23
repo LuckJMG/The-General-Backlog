@@ -24,7 +24,7 @@ export const columns: ColumnDef<Entry>[] = [
 	{
 		id: "actions",
 		cell: ({ row }) => {
-			return renderComponent(DashboardActions, { });
+			return renderComponent(DashboardActions, { id: row.original.id });
 		},
 	},
 ];

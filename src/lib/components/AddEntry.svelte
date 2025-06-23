@@ -3,9 +3,9 @@
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import { Input } from "$lib/components/ui/input/index.js";
 	import { Label } from "$lib/components/ui/label/index.js";
-    import { entries, updateCookies } from "$lib/dashboard.svelte";
 	import CirclePlus from "@lucide/svelte/icons/circle-plus";
     import { Entry } from "$lib/entry";
+    import { dashboardStore } from "$lib/dashboard.svelte";
 
 	let title = $state("");
 	let score: number | null = $state(null);
@@ -14,10 +14,10 @@
 
 	function onclick() {
 		if (!title || score === null || duration === null) return;
-		if (entries.some(entry => entry.id === Entry.getId(title))) return;
+		if (dashboardStore.entries.some(entry => entry.id === Entry.getId(title))) return;
 
-		entries.push(new Entry(title, score, duration))
-		updateCookies();
+		let newEntry = new Entry(title, score, duration);
+		dashboardStore.addEntry(newEntry);
 
 		title = "";
 		score = null;

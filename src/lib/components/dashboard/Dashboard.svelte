@@ -6,7 +6,7 @@
         type PaginationState,
 	} from "@tanstack/table-core";
 	import { columns } from "./columns";
-	import { entries, sorting, updateCookies } from "$lib/dashboard.svelte";
+	import { dashboardStore } from "$lib/dashboard.svelte";
 	import {
 		createSvelteTable,
 		FlexRender,
@@ -14,8 +14,8 @@
 	import * as Table from "$lib/components/ui/table/index.js";
     import DashboardControls from "./DashboardControls.svelte";
 
-	let stableData = $derived([...entries]);
-	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 20 });
+	let stableData = $derived([...dashboardStore.entries]);
+	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
 
 	const table = createSvelteTable({
 		get data() {
@@ -27,13 +27,9 @@
 		getPaginationRowModel: getPaginationRowModel(),
 		onSortingChange: (updater) => {
 			let newSorting = typeof updater === "function" ?
-				updater(sorting) : updater;
+				updater(dashboardStore.sorting) : updater;
 
-			if (newSorting.length !== 0) sorting[0] = newSorting[0];
-			else sorting.pop();
-
-			stableData = [...entries];
-			updateCookies();
+			dashboardStore.setSorting(newSorting);
 		},
 		onPaginationChange: (updater) => {
 			pagination = typeof updater === "function" ?
@@ -41,7 +37,7 @@
 		},
 		state: {
 			get sorting() {
-				return sorting;
+				return dashboardStore.sorting;
 			},
 			get pagination() {
 				return pagination;

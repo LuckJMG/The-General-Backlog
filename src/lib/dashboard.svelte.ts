@@ -16,43 +16,54 @@ export const columnKeyMap: Record<Column, keyof Entry> = {
 	[Column.PRIORITY]: "priority",
 };
 
-const defaultSorting: SortingState = [{
-	desc: true,
-	id: "priority",
-}];
+class DashboardStore {
+	entries = $state<Entry[]>([]);
+	sorting = $state<SortingState>([{ desc: true, id: "priority" }]);
 
-export function updateCookies() {
-	const cookieConfig = (label: string, data: any) => serialize(
-		label,
-		JSON.stringify(data),
-		{
-			path: "/",
-			sameSite: "strict",
-			maxAge: 60 * 60 * 24 * 30,
+	constructor() {
+		try {
+			let cookies = parse(document.cookie);
+			this.entries = cookies.entries ? JSON.parse(cookies.entries) : this.entries;
+			this.sorting = cookies.sorting ? JSON.parse(cookies.sorting) : this.sorting;
 		}
-	);
+		catch (err) {
+			console.warn("Could not parse entries from cookies:", err);
+		}
+	}
 
-	try {
-		document.cookie = cookieConfig("entries", entries);
-		document.cookie = cookieConfig("sorting", sorting);
-	} catch (err) {
-		console.error("Failed to save entries to cookies:", err);
+	updateCookies() {
+		const cookieConfig = (label: string, data: any) => serialize(
+			label,
+			JSON.stringify(data),
+			{
+				path: "/",
+				sameSite: "strict",
+				maxAge: 60 * 60 * 24 * 30,
+			}
+		);
+
+		try {
+			document.cookie = cookieConfig("entries", this.entries);
+			document.cookie = cookieConfig("sorting", this.sorting);
+		} catch (err) {
+			console.error("Failed to save entries to cookies:", err);
+		}
+	}
+
+	deleteEntry(id: string) {
+		this.entries = this.entries.filter(entry => entry.id !== id);
+		this.updateCookies();
+	}
+
+	addEntry(entry: Entry) {
+		this.entries.push(entry);
+		this.updateCookies();
+	}
+
+	setSorting(newSorting: SortingState) {
+		this.sorting = newSorting;
+		this.updateCookies();
 	}
 }
 
-export function getCookies(): { entries: Entry[], sorting: SortingState } {
-	try {
-		let cookies = parse(document.cookie);
-		let entries = cookies.entries ? JSON.parse(cookies.entries) : [];
-		let sorting = cookies.sorting ? JSON.parse(cookies.sorting) : [...defaultSorting];
-		return { entries, sorting };
-	}
-	catch (err) {
-		console.warn("Could not parse entries from cookies:", err);
-		return { entries: [], sorting: [...defaultSorting] };
-	}
-}
-
-const cookies = getCookies();
-export const entries: Entry[] = $state(cookies.entries);
-export const sorting: SortingState = $state(cookies.sorting);
+export const dashboardStore = new DashboardStore();
