@@ -12,7 +12,7 @@
 		FlexRender,
 	} from "$lib/components/ui/data-table/index.js";
 	import * as Table from "$lib/components/ui/table/index.js";
-    import { Button } from "../ui/button";
+    import DashboardControls from "./DashboardControls.svelte";
 
 	let stableData = $derived([...entries]);
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 20 });
@@ -89,22 +89,5 @@
 		{/each}
 		</Table.Body>
 	</Table.Root>
-	<div class="flex items-center justify-end space-x-2 py-4">
-		<Button
-		variant="outline"
-		size="sm"
-		onclick={() => table.previousPage()}
-		disabled={!table.getCanPreviousPage()}
-		>
-		Previous
-		</Button>
-		<Button
-		variant="outline"
-		size="sm"
-		onclick={() => table.nextPage()}
-		disabled={!table.getCanNextPage()}
-		>
-		Next
-		</Button>
-	</div>
+	<DashboardControls {table} />
 </div>
