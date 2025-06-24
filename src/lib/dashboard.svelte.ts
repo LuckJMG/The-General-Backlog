@@ -2,20 +2,6 @@ import { parse, serialize } from "cookie";
 import { Entry } from "./entry";
 import type { SortingState } from "@tanstack/table-core";
 
-export enum Column {
-	TITLE = 'Title',
-	SCORE = 'Score',
-	DURATION = 'Duration',
-	PRIORITY = 'Priority',
-};
-
-export const columnKeyMap: Record<Column, keyof Entry> = {
-	[Column.TITLE]: "title",
-	[Column.SCORE]: "score",
-	[Column.DURATION]: "duration",
-	[Column.PRIORITY]: "priority",
-};
-
 class DashboardStore {
 	entries = $state<Entry[]>([]);
 	sorting = $state<SortingState>([{ desc: true, id: "priority" }]);
