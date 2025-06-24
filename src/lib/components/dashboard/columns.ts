@@ -1,8 +1,10 @@
 import type { Column, ColumnDef } from "@tanstack/table-core";
-import { renderComponent } from "$lib/components/ui/data-table/index.js";
+import { renderComponent, renderSnippet } from "$lib/components/ui/data-table/index.js";
 import DashboardHeader from "./DashboardHeader.svelte";
 import DashboardActions from "./DashboardActions.svelte";
 import type { Entry } from "$lib/entry";
+import { createRawSnippet } from "svelte";
+import { dashboardStore } from "$lib/dashboard.svelte";
 
 export const columns: ColumnDef<Entry>[] = [
 	{
@@ -20,6 +22,15 @@ export const columns: ColumnDef<Entry>[] = [
 	{
 		accessorKey: "priority",
 		header: ({ column }) => renderHeader(column, "Priority"),
+		cell: ({ getValue }) => {
+			let priority = getValue() as number;
+			let { min, max } = dashboardStore.range;
+
+			if (min === max) return "50";
+
+			let normalized = Math.round(((priority - min) / (max - min)) * 100);
+			return normalized.toString();
+		}
 	},
 	{
 		id: "actions",

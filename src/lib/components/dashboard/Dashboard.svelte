@@ -17,6 +17,8 @@
 	let stableData = $derived([...dashboardStore.entries]);
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
 
+	console.log(dashboardStore.range);
+
 	const table = createSvelteTable({
 		get data() {
 			return stableData;
