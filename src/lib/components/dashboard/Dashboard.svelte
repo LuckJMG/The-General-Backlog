@@ -14,14 +14,12 @@
 	import * as Table from "$lib/components/ui/table/index.js";
     import DashboardControls from "./DashboardControls.svelte";
 
-	let stableData = $derived([...dashboardStore.entries]);
+	let tableData = $derived([...dashboardStore.entries]);
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
-
-	console.log(dashboardStore.range);
 
 	const table = createSvelteTable({
 		get data() {
-			return stableData;
+			return tableData;
 		},
 		columns,
 		getCoreRowModel: getCoreRowModel(),
