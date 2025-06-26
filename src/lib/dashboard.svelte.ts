@@ -8,6 +8,10 @@ class DashboardStore {
 	range = $state({ min: NaN, max: NaN });
 
 	constructor() {
+		if (typeof document !== "undefined") this.loadFromCookies();
+	}
+
+	private loadFromCookies() {
 		try {
 			let cookies = parse(document.cookie);
 			this.entries = cookies.entries ? JSON.parse(cookies.entries) : this.entries;
@@ -20,6 +24,8 @@ class DashboardStore {
 	}
 
 	updateCookies() {
+		if (typeof document === "undefined") return;
+
 		const cookieConfig = (label: string, data: any) => serialize(
 			label,
 			JSON.stringify(data),
