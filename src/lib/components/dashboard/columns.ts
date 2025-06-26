@@ -1,9 +1,8 @@
 import type { Column, ColumnDef } from "@tanstack/table-core";
-import { renderComponent, renderSnippet } from "$lib/components/ui/data-table/index.js";
+import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import DashboardHeader from "./DashboardHeader.svelte";
 import DashboardActions from "./DashboardActions.svelte";
 import type { Entry } from "$lib/entry";
-import { createRawSnippet } from "svelte";
 import { dashboardStore } from "$lib/dashboard.svelte";
 
 export const columns: ColumnDef<Entry>[] = [
@@ -40,7 +39,7 @@ export const columns: ColumnDef<Entry>[] = [
 	},
 ];
 
-function renderHeader(column: Column<Entry, unknown>, label: String) {
+function renderHeader(column: Column<Entry, unknown>, label: string) {
 	return renderComponent(DashboardHeader, {
 				label: label,
 				onclick: column.getToggleSortingHandler(),
