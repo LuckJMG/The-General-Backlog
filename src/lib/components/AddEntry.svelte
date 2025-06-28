@@ -46,20 +46,22 @@
 			<Dialog.Title>New Entry</Dialog.Title>
 		</Dialog.Header>
 		<div class="grid gap-4 py-4">
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="title" class="text-right">Title</Label>
+			<div class="space-y-2">
+				<Label for="title">Title</Label>
 				<Input id="title" bind:value={title} class="col-span-3" required/>
 				{#if entryExists}
-				<p class="text-sm text-red-500 col-span-4 text-center">An entry with this title already exists</p>
+				<p class="text-sm text-red-500 col-span-4">An entry with this title already exists</p>
 				{/if}
 			</div>
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="score" class="text-right">Score</Label>
-				<Input id="score" type="number" bind:value={score} class="col-span-3" required/>
-			</div>
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="duration" class="text-right">Duration</Label>
-				<Input id="duration" type="number" bind:value={duration} class="col-span-3" required/>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<Label for="score">Score</Label>
+					<Input id="score" type="number" bind:value={score} class="col-span-1" required/>
+				</div>
+				<div class="space-y-2">
+					<Label for="duration">Duration</Label>
+					<Input id="duration" type="number" bind:value={duration} class="col-span-1" required/>
+				</div>
 			</div>
 		</div>
 		<Dialog.Footer>
