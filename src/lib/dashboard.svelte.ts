@@ -3,7 +3,7 @@ import { Entry } from "./entry";
 import type { SortingState } from "@tanstack/table-core";
 
 class DashboardStore {
-	entries = $state<Entry[]>([]);
+	entries = $state<Record<string, Entry>>({});
 	sorting = $state<SortingState>([{ desc: true, id: "priority" }]);
 	range = $state({ min: NaN, max: NaN });
 
@@ -46,11 +46,12 @@ class DashboardStore {
 	}
 
 	deleteEntry(id: string) {
-		this.entries = this.entries.filter(entry => entry.id !== id);
+		delete this.entries[id];
 
-		if (this.entries.length === 0) this.range = { min: NaN, max: NaN };
+		let entryValues = Object.values(this.entries);
+		if (entryValues.length === 0) this.range = { min: NaN, max: NaN };
 		else {
-			let priorities = this.entries.map(entry => entry.priority);
+			let priorities = entryValues.map(entry => entry.priority);
 			this.range.max = Math.max(...priorities);
 			this.range.min = Math.min(...priorities);
 		}
@@ -59,7 +60,7 @@ class DashboardStore {
 	}
 
 	addEntry(entry: Entry) {
-		this.entries.push(entry);
+		this.entries[entry.getID()] = entry;
 
 		if (Number.isNaN(this.range.max) || entry.priority > this.range.max)
 			this.range.max = entry.priority;

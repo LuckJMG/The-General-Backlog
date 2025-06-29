@@ -13,7 +13,7 @@
 	let isDialogOpen = $state(false);
 	let entryExists = $derived(
 		title !== "" &&
-		dashboardStore.entries.some(entry => entry.id === Entry.getId(title))
+		Entry.getID(title) in dashboardStore.entries
 	)
 	let disabled = $derived(
 		title.trim() === "" ||
@@ -24,7 +24,7 @@
 
 	function onclick() {
 		if (!title || score === null || duration === null) return;
-		if (dashboardStore.entries.some(entry => entry.id === Entry.getId(title))) return;
+		if (Entry.getID(title) in dashboardStore.entries) return;
 
 		let newEntry = new Entry(title, score, duration);
 		dashboardStore.addEntry(newEntry);

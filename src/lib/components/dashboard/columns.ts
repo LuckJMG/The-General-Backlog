@@ -2,7 +2,7 @@ import type { Column, ColumnDef } from "@tanstack/table-core";
 import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import DashboardHeader from "./DashboardHeader.svelte";
 import DashboardActions from "./DashboardActions.svelte";
-import type { Entry } from "$lib/entry";
+import { Entry } from "$lib/entry";
 import { dashboardStore } from "$lib/dashboard.svelte";
 
 export const columns: ColumnDef<Entry>[] = [
@@ -34,7 +34,7 @@ export const columns: ColumnDef<Entry>[] = [
 	{
 		id: "actions",
 		cell: ({ row }) => {
-			return renderComponent(DashboardActions, { id: row.original.id });
+			return renderComponent(DashboardActions, { id: Entry.getID(row.original.title) });
 		},
 	},
 ];
