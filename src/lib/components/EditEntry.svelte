@@ -47,16 +47,6 @@
 		dashboardStore.updateCookies();
 		isDialogOpen = false;
 	}
-
-	function onCancel() {
-		if (existingEntry) {
-			title = existingEntry.title;
-			score = existingEntry.score;
-			duration = existingEntry.duration;
-		}
-
-		isDialogOpen = false;
-	}
 </script>
 
 <Dialog.Root bind:open={isDialogOpen}>
@@ -84,7 +74,6 @@
 			</div>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={onCancel}>Cancel</Button>
 			<Button onclick={onSave} {disabled}>Save Changes</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
