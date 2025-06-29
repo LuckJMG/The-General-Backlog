@@ -9,6 +9,15 @@
 			],
 			"label": "npm: dev",
 			"detail": "vite dev"
+		},
+		{
+			"type": "npm",
+			"script": "preview",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"label": "npm: preview",
+			"detail": "vite preview"
 		}
 	]
 }
