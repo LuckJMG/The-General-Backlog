@@ -24,7 +24,7 @@
 		</Button>
 	{/snippet}
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content>
+	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item onclick={() => isEditDialogOpen = true}>Edit</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => dashboardStore.deleteEntry(id)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
