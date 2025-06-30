@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Ellipsis from "@lucide/svelte/icons/ellipsis";
+	import Pencil from "@lucide/svelte/icons/pencil";
+	import Trash2 from "@lucide/svelte/icons/trash-2";
 	import { Button } from "$lib/components/ui/button/index.js";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
 	import { dashboardStore } from "$lib/dashboard.svelte";
     import EditEntry from "../EditEntry.svelte";
 
@@ -10,24 +10,26 @@
 	let isEditDialogOpen = $state(false);
 </script>
 
-<DropdownMenu.Root>
-	<DropdownMenu.Trigger>
-	{#snippet child({ props })}
-		<Button
-			{...props}
-			variant="ghost"
-			size="icon"
-			class="relative size-8 p-0"
-		>
-			<span class="sr-only">Open menu</span>
-			<Ellipsis />
-		</Button>
-	{/snippet}
-	</DropdownMenu.Trigger>
-	<DropdownMenu.Content align="end">
-		<DropdownMenu.Item onclick={() => isEditDialogOpen = true}>Edit</DropdownMenu.Item>
-		<DropdownMenu.Item onclick={() => dashboardStore.deleteEntry(id)}>Delete</DropdownMenu.Item>
-	</DropdownMenu.Content>
-</DropdownMenu.Root>
+<div class="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white">
+	<Button
+		variant="ghost"
+		size="icon"
+		class="relative size-8 p-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+		onclick={() => isEditDialogOpen = true}
+	>
+		<span class="sr-only">Edit</span>
+		<Pencil class="size-4" />
+	</Button>
+
+	<Button
+		variant="ghost"
+		size="icon"
+		class="relative size-8 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
+		onclick={() => dashboardStore.deleteEntry(id)}
+	>
+		<span class="sr-only">Delete</span>
+		<Trash2 class="size-4" />
+	</Button>
+</div>
 
 <EditEntry {id} bind:isOpen={isEditDialogOpen} />

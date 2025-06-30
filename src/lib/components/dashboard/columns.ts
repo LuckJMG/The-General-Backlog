@@ -1,7 +1,6 @@
 import { type Column, type ColumnDef, type Row } from "@tanstack/table-core";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table/index.js";
 import DashboardHeader from "./DashboardHeader.svelte";
-import DashboardActions from "./DashboardActions.svelte";
 import { Entry } from "$lib/entry";
 import { dashboardStore } from "$lib/dashboard.svelte";
 import { createRawSnippet } from "svelte";
@@ -41,12 +40,6 @@ export const columns: ColumnDef<Entry>[] = [
 			let normalized = Math.round(((priority - min) / (max - min)) * 100);
 			return renderSnippet(priorityCellSnippet, normalized.toString());
 		}
-	},
-	{
-		id: "actions",
-		cell: ({ row }) => {
-			return renderComponent(DashboardActions, { id: Entry.getID(row.original.title) });
-		},
 	},
 ];
 
