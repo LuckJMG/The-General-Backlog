@@ -20,7 +20,7 @@ export const columns: ColumnDef<Entry>[] = [
 	{
 		accessorKey: "duration",
 		header: ({ column }) => renderHeader(column, "Duration"),
-		cell: ({ row }) => renderCell(row, "score", "pl-4"),
+		cell: ({ row }) => renderCell(row, "duration", "pl-4"),
 	},
 	{
 		accessorKey: "priority",
