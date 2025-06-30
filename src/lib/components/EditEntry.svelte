@@ -42,9 +42,8 @@
 
 		let updatedEntry = new Entry(title, score, duration);
 		delete dashboardStore.entries[existingEntry.title];
-		dashboardStore.entries[Entry.getID(title)] = updatedEntry;
+		dashboardStore.addEntry(updatedEntry);
 
-		dashboardStore.updateCookies();
 		isDialogOpen = false;
 	}
 </script>
