@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+	import { Button } from "$lib/components/ui/button/index.js";
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import { Input } from "$lib/components/ui/input/index.js";
 	import { Label } from "$lib/components/ui/label/index.js";
     import { Entry } from "$lib/entry";
     import { dashboardStore } from "$lib/dashboard.svelte";
+	import Trash2 from "@lucide/svelte/icons/trash-2";
 
 	let { id, isOpen: isDialogOpen = $bindable() } = $props();
 
@@ -33,7 +34,17 @@
 		duration === null ||
 		entryExists ||
 		!existingEntry
-	)
+	);
+
+	$effect(() => {
+		if (isDialogOpen && existingEntry) {
+			title = existingEntry.title;
+			score = existingEntry.score;
+			duration = existingEntry.duration;
+		} else if (isDialogOpen && !existingEntry) {
+			isDialogOpen = false;
+		}
+	});
 
 	function onSave() {
 		if (!existingEntry || !title || score === null || duration === null)
@@ -45,12 +56,18 @@
 
 		isDialogOpen = false;
 	}
+
+	function onDelete() {
+		if (!existingEntry) return;
+		isDialogOpen = false;
+		dashboardStore.deleteEntry(Entry.getID(existingEntry.title));
+	}
 </script>
 
 <Dialog.Root bind:open={isDialogOpen}>
 	<Dialog.Content class="sm:max-w-[425px]">
 		<Dialog.Header>
-			<Dialog.Title>Edit Entry</Dialog.Title>
+			<Dialog.Title>{existingEntry?.title || ""}</Dialog.Title>
 		</Dialog.Header>
 		<div class="grid gap-4 py-4">
 			<div class="space-y-2">
@@ -72,7 +89,12 @@
 			</div>
 		</div>
 		<Dialog.Footer>
-			<Button onclick={onSave} {disabled}>Save Changes</Button>
+			<div class="flex items-center justify-between w-full">
+				<Button variant="destructive" onclick={onDelete}>
+					<Trash2 class="size-4" />
+				</Button>
+				<Button onclick={onSave} {disabled}>Save Changes</Button>
+			</div>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

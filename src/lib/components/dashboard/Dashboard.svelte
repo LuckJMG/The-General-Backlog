@@ -13,11 +13,13 @@
 	} from "$lib/components/ui/data-table/index.js";
 	import * as Table from "$lib/components/ui/table/index.js";
     import DashboardControls from "./DashboardControls.svelte";
-    import DashboardActions from "./DashboardActions.svelte";
     import { Entry } from "$lib/entry";
+    import EditEntry from "../EditEntry.svelte";
 
 	let tableData = $derived(Object.values(dashboardStore.entries));
 	let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 5 });
+	let isEditDialogOpen = $state(false);
+	let selectedEntryId = $state("");
 
 	const table = createSvelteTable({
 		get data() {
@@ -69,7 +71,14 @@
 			</Table.Header>
 			<Table.Body>
 			{#each table.getRowModel().rows as row (row.id)}
-				<Table.Row data-state={row.getIsSelected() && "selected"} class="group relative">
+				<Table.Row
+					data-state={row.getIsSelected() && "selected"}
+					class="group relative"
+					onclick={() => {
+						selectedEntryId = Entry.getID(row.original.title);
+						isEditDialogOpen = true;
+					}}
+				>
 				{#each row.getVisibleCells() as cell (cell.id)}
 					<Table.Cell>
 						<FlexRender
@@ -78,9 +87,6 @@
 						/>
 					</Table.Cell>
 				{/each}
-				<div class="absolute -top-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-					<DashboardActions id={Entry.getID(row.original.title)} />
-				</div>
 				</Table.Row>
 			{:else}
 				<Table.Row>
@@ -93,4 +99,5 @@
 		</Table.Root>
 	</div>
 	<DashboardControls {table} />
+	<EditEntry id={selectedEntryId} bind:isOpen={isEditDialogOpen} />
 </div>
