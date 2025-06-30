@@ -70,6 +70,11 @@ class DashboardStore {
 		this.updateCookies();
 	}
 
+	editEntry(id: string, updatedEntry: Entry) {
+		delete this.entries[id];
+		this.addEntry(updatedEntry);
+	}
+
 	setSorting(newSorting: SortingState) {
 		this.sorting = newSorting;
 		this.updateCookies();

@@ -41,8 +41,7 @@
 		if (entryExists) return;
 
 		let updatedEntry = new Entry(title, score, duration);
-		delete dashboardStore.entries[existingEntry.title];
-		dashboardStore.addEntry(updatedEntry);
+		dashboardStore.editEntry(Entry.getID(existingEntry.title), updatedEntry);
 
 		isDialogOpen = false;
 	}
