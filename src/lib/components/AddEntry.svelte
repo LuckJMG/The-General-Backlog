@@ -38,7 +38,7 @@
 </script>
 
 <Dialog.Root bind:open={isDialogOpen}>
-	<Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
+	<Dialog.Trigger class="{buttonVariants({ variant: "outline" })} mb-4">
 		Add Entry <CirclePlus />
 	</Dialog.Trigger>
 	<Dialog.Content class="sm:max-w-[425px]">

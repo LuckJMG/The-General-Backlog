@@ -3,5 +3,7 @@
     import Dashboard from "$lib/components/dashboard/Dashboard.svelte";
 </script>
 
-<AddEntry />
-<Dashboard />
+<div class="mt-5 mx-14">
+	<AddEntry />
+	<Dashboard />
+</div>
