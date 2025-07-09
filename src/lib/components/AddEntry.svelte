@@ -4,12 +4,15 @@
 	import { Input } from "$lib/components/ui/input/index.js";
 	import { Label } from "$lib/components/ui/label/index.js";
 	import CirclePlus from "@lucide/svelte/icons/circle-plus";
-    import { Entry } from "$lib/entry";
+    import { Entry, type SelectType, Status } from "$lib/entry";
     import { dashboardStore } from "$lib/dashboard.svelte";
+    import SelectInput from "./SelectInput.svelte";
 
 	let title = $state("");
 	let score: number | null = $state(null);
 	let duration: number | null = $state(null);
+	let status: SelectType = $state(Status.PENDING);
+
 	let isDialogOpen = $state(false);
 	let entryExists = $derived(
 		title !== "" &&
@@ -26,7 +29,7 @@
 		if (!title || score === null || duration === null) return;
 		if (Entry.getID(title) in dashboardStore.entries) return;
 
-		let newEntry = new Entry(title, score, duration);
+		let newEntry = new Entry(title, score, duration, status);
 		dashboardStore.addEntry(newEntry);
 
 		title = "";
@@ -57,6 +60,16 @@
 				<div class="space-y-2">
 					<Label for="score">Score</Label>
 					<Input id="score" type="number" bind:value={score} class="col-span-1" required/>
+				</div>
+				<div class="space-y-2">
+					<Label for="duration">Duration</Label>
+					<Input id="duration" type="number" bind:value={duration} class="col-span-1" required/>
+				</div>
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<Label for="status">Status</Label>
+					<SelectInput list={Status} bind:value={status} name="Status"/>
 				</div>
 				<div class="space-y-2">
 					<Label for="duration">Duration</Label>

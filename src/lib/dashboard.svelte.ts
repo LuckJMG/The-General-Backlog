@@ -71,7 +71,7 @@ class DashboardStore {
 	}
 
 	editEntry(id: string, updatedEntry: Entry) {
-		delete this.entries[id];
+		this.deleteEntry(id);
 		this.addEntry(updatedEntry);
 	}
 

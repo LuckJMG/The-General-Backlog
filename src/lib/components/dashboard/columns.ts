@@ -1,7 +1,7 @@
 import { type Column, type ColumnDef, type Row } from "@tanstack/table-core";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table/index.js";
 import DashboardHeader from "./DashboardHeader.svelte";
-import { Entry } from "$lib/entry";
+import { Entry, type SelectType } from "$lib/entry";
 import { dashboardStore } from "$lib/dashboard.svelte";
 import { createRawSnippet } from "svelte";
 
@@ -10,6 +10,36 @@ export const columns: ColumnDef<Entry>[] = [
 		accessorKey: "title",
 		header: ({ column }) => renderHeader(column, "Title"),
 		cell: ({ row }) => renderCell(row, "title", "pl-4 font-medium text-[#374151]"),
+	},
+	{
+		accessorKey: "status",
+		header: ({ column }) => renderHeader(column, "Status"),
+		cell: ({ row }) => {
+			let statusCellSnippet = createRawSnippet<[any]>((getStatus) => {
+				const status = getStatus();
+				return {
+					render: () => `
+						<div class="pl-4">
+							<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${status.badgeClass}">
+								${status.label}
+							</span>
+						</div>
+					`,
+				};
+			});
+
+			return renderSnippet(statusCellSnippet, row.getValue("status"));
+		},
+		sortingFn: (rowA, rowB, columnId) => {
+			let statusA: SelectType = rowA.getValue(columnId);
+			let statusB: SelectType = rowB.getValue(columnId);
+
+			// Compare by label
+			let labelA = statusA?.label || '';
+			let labelB = statusB?.label || '';
+
+			return labelA.localeCompare(labelB);
+		}
 	},
 	{
 		accessorKey: "score",

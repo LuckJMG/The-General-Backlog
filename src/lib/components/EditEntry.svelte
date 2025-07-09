@@ -3,9 +3,10 @@
 	import * as Dialog from "$lib/components/ui/dialog/index.js";
 	import { Input } from "$lib/components/ui/input/index.js";
 	import { Label } from "$lib/components/ui/label/index.js";
-    import { Entry } from "$lib/entry";
+    import { Entry, type SelectType, Status } from "$lib/entry";
     import { dashboardStore } from "$lib/dashboard.svelte";
 	import Trash2 from "@lucide/svelte/icons/trash-2";
+    import SelectInput from "./SelectInput.svelte";
 
 	let { id, isOpen: isDialogOpen = $bindable() } = $props();
 
@@ -13,12 +14,14 @@
 	let title = $state("");
 	let score: number | null = $state(null);
 	let duration: number | null = $state(null);
+	let status: SelectType = $state(Status.PENDING);
 
 	$effect(() => {
 		if (isDialogOpen && existingEntry) {
 			title = existingEntry.title;
 			score = existingEntry.score;
 			duration = existingEntry.duration;
+			status = existingEntry.status;
 		}
 	});
 
@@ -41,6 +44,7 @@
 			title = existingEntry.title;
 			score = existingEntry.score;
 			duration = existingEntry.duration;
+			status = existingEntry.status;
 		} else if (isDialogOpen && !existingEntry) {
 			isDialogOpen = false;
 		}
@@ -51,7 +55,7 @@
 			return;
 		if (entryExists) return;
 
-		let updatedEntry = new Entry(title, score, duration);
+		let updatedEntry = new Entry(title, score, duration, status);
 		dashboardStore.editEntry(Entry.getID(existingEntry.title), updatedEntry);
 
 		isDialogOpen = false;
@@ -81,6 +85,16 @@
 				<div class="space-y-2">
 					<Label for="score">Score</Label>
 					<Input id="score" type="number" bind:value={score} class="col-span-1" required/>
+				</div>
+				<div class="space-y-2">
+					<Label for="duration">Duration</Label>
+					<Input id="duration" type="number" bind:value={duration} class="col-span-1" required/>
+				</div>
+			</div>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="space-y-2">
+					<Label for="status">Status</Label>
+					<SelectInput list={Status} bind:value={status} name="Status"/>
 				</div>
 				<div class="space-y-2">
 					<Label for="duration">Duration</Label>
