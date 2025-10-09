@@ -1,4 +1,4 @@
-import { type Column, type ColumnDef, type Row } from "@tanstack/table-core";
+import { type Column, type ColumnDef } from "@tanstack/table-core";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table/index.js";
 import DashboardHeader from "./DashboardHeader.svelte";
 import { Entry, type SelectType } from "$lib/entry";
@@ -9,7 +9,7 @@ export const columns: ColumnDef<Entry>[] = [
 	{
 		accessorKey: "title",
 		header: ({ column }) => renderHeader(column, "Title"),
-		cell: ({ row }) => renderCell(row, "title", "pl-4 font-medium text-[#374151]"),
+		cell: ({ row }) => renderCell(row.original.title, "pl-4 font-medium text-[#374151]"),
 	},
 	{
 		accessorKey: "status",
@@ -34,7 +34,6 @@ export const columns: ColumnDef<Entry>[] = [
 			let statusA: SelectType = rowA.getValue(columnId);
 			let statusB: SelectType = rowB.getValue(columnId);
 
-			// Compare by label
 			let labelA = statusA?.label || '';
 			let labelB = statusB?.label || '';
 
@@ -44,12 +43,12 @@ export const columns: ColumnDef<Entry>[] = [
 	{
 		accessorKey: "score",
 		header: ({ column }) => renderHeader(column, "Score"),
-		cell: ({ row }) => renderCell(row, "score", "pl-4"),
+		cell: ({ row }) => renderCell(row.original.score.toString(), "pl-4"),
 	},
 	{
 		accessorKey: "duration",
 		header: ({ column }) => renderHeader(column, "Duration"),
-		cell: ({ row }) => renderCell(row, "duration", "pl-4"),
+		cell: ({ row }) => renderCell(row.original.duration.toString(), "pl-4"),
 	},
 	{
 		accessorKey: "priority",
@@ -81,12 +80,11 @@ function renderHeader(column: Column<Entry, unknown>, label: string) {
 			})
 }
 
-function renderCell(row: Row<Entry>, column: string, classes: string) {
+function renderCell(value: string, classes: string) {
 	let cellSnippet = createRawSnippet<[string]>((getValue) => {
-		let value = getValue();
 		return {
-			render: () => `<div class="${classes}">${value}</div>`
+			render: () => `<div class="${classes}">${getValue()}</div>`
 		};
 	});
-	return renderSnippet(cellSnippet, row.getValue(column));
+	return renderSnippet(cellSnippet, value);
 }
