@@ -19,12 +19,39 @@ const init = async () => {
         }
 
         db.exec(sql`
-            CREATE TABLE IF NOT EXISTS items (
+			PRAGMA foreign_keys = ON;
+
+			CREATE TABLE IF NOT EXISTS backlogs (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				name TEXT NOT NULL,
+				duration_unit TEXT DEFAULT 'minutes'
+			);
+
+            CREATE TABLE IF NOT EXISTS entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+				backlog_id INTEGER NOT NULL,
+				FOREIGN KEY (backlog_id) REFERENCES backlogs(id) ON DELETE CASCADE,
+
+				-- Fields
                 title TEXT NOT NULL,
-                status TEXT CHECK(status IN ('pending', 'completed')) DEFAULT 'pending',
-                created_at INTEGER DEFAULT (unixepoch())
+                score INTEGER NOT NULL DEFAULT 1,
+                duration INTEGER NOT NULL DEFAULT 1,
+                status TEXT CHECK(status IN ('pending', 'started', 'dropped', 'finished', 'completed')) DEFAULT 'pending',
+
+				-- Dates
+                created_at INTEGER DEFAULT (unixepoch()),
+                started_at INTEGER DEFAULT NULL,
+                finished_at INTEGER DEFAULT NULL,
+
+				-- Evaluation
+				ranking REAL DEFAULT NULL,
+                rating INTEGER CHECK(rating BETWEEN 0 AND 10) DEFAULT 5,
+				review TEXT DEFAULT ''
             );
+
+			CREATE INDEX IF NOT EXISTS idx_entries_backlog ON entries(backlog_id);
+			CREATE INDEX IF NOT EXISTS idx_entries_status ON entries(status);
+			CREATE INDEX IF NOT EXISTS idx_entries_ranking ON entries(ranking ASC);
         `);
 
         postMessage({ type: 'READY' });
