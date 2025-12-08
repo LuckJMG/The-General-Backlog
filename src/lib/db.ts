@@ -1,5 +1,3 @@
-import { sql } from './sql';
-
 interface WorkerMessage {
     id: number;
     resolve: (value: any) => void;
@@ -9,6 +7,9 @@ interface WorkerMessage {
 let worker: Worker | null = null;
 let messageId = 0;
 const pendingMessages = new Map<number, WorkerMessage>();
+
+export const sql = (strings: TemplateStringsArray, ...values: any[]) => 
+    String.raw({ raw: strings }, ...values);
 
 export const initDB = async () => {
     if (worker) return;
@@ -37,7 +38,7 @@ export const initDB = async () => {
     await new Promise(r => setTimeout(r, 500)); 
 };
 
-const query = async (sql: string, bind: any[] = []) => {
+export const query = async (sql: string, bind: any[] = []) => {
     if (!worker) await initDB();
     
     return new Promise((resolve, reject) => {
@@ -45,16 +46,4 @@ const query = async (sql: string, bind: any[] = []) => {
         pendingMessages.set(id, { id, resolve, reject });
         worker!.postMessage({ type: 'EXEC', id, sql, bind });
     });
-};
-
-export const getItems = async () => {
-    return await query(sql`SELECT * FROM items ORDER BY created_at DESC`) as any[];
-};
-
-export const addItem = async (title: string) => {
-    await query(sql`INSERT INTO items (title) VALUES (?)`, [title]);
-};
-
-export const completeItem = async (id: number) => {
-    await query(sql`UPDATE items SET status = 'completed' WHERE id = ?`, [id]);
 };
