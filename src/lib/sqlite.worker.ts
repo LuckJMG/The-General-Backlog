@@ -1,7 +1,10 @@
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import { sql } from './sql';
+
 
 let db: any = null;
+
+const sql = (strings: TemplateStringsArray, ...values: any[]) => 
+    String.raw({ raw: strings }, ...values);
 
 const init = async () => {
     const sqlite3 = await sqlite3InitModule({
@@ -24,7 +27,6 @@ const init = async () => {
 			CREATE TABLE IF NOT EXISTS backlogs (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				name TEXT NOT NULL,
-				duration_unit TEXT DEFAULT 'minutes'
 			);
 
             CREATE TABLE IF NOT EXISTS entries (
@@ -34,8 +36,8 @@ const init = async () => {
 
 				-- Fields
                 title TEXT NOT NULL,
-                score INTEGER NOT NULL DEFAULT 1,
-                duration INTEGER NOT NULL DEFAULT 1,
+                score REAL NOT NULL DEFAULT 1.0,
+                duration REAL NOT NULL DEFAULT 1.0,
                 status TEXT CHECK(status IN ('pending', 'started', 'dropped', 'finished', 'completed')) DEFAULT 'pending',
 
 				-- Dates
