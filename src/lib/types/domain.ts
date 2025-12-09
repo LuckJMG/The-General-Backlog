@@ -1,4 +1,4 @@
-import type { EntryStatus } from './db.types';
+import type { EntryStatus } from './db';
 
 export interface Entry {
     id: number;

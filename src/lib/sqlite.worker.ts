@@ -32,7 +32,6 @@ const init = async () => {
             CREATE TABLE IF NOT EXISTS entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
 				backlog_id INTEGER NOT NULL,
-				FOREIGN KEY (backlog_id) REFERENCES backlogs(id) ON DELETE CASCADE,
 
 				-- Fields
                 title TEXT NOT NULL,
@@ -48,7 +47,9 @@ const init = async () => {
 				-- Evaluation
 				ranking REAL DEFAULT NULL,
                 rating INTEGER CHECK(rating BETWEEN 0 AND 10) DEFAULT 5,
-				review TEXT DEFAULT ''
+				review TEXT DEFAULT '',
+
+				FOREIGN KEY (backlog_id) REFERENCES backlogs(id) ON DELETE CASCADE
             );
 
 			CREATE INDEX IF NOT EXISTS idx_entries_backlog ON entries(backlog_id);
