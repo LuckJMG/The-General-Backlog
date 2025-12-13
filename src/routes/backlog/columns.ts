@@ -3,6 +3,7 @@ import { createRawSnippet } from "svelte";
 import { renderSnippet, renderComponent } from "$lib/components/ui/data-table/index.js";
 import type { Entry } from "$lib/types/domain";
 import StatusCell from "./status-cell.svelte";
+import InterestCell from "./interest-cell.svelte";
 
 export const columns: ColumnDef<Entry>[] = [
     {
@@ -76,6 +77,22 @@ export const columns: ColumnDef<Entry>[] = [
         },
     },
     {
+        accessorKey: "interest",
+        header: () => {
+            return renderSnippet(
+                createRawSnippet(() => ({
+                    render: () => `<div class="text-center w-full font-semibold">Interest</div>`,
+                }))
+            );
+        },
+        cell: ({ row }) => {
+            return renderComponent(InterestCell, {
+                value: row.getValue("interest"),
+                class: "flex justify-center"
+            });
+        },
+    },
+    {
         accessorKey: "priority",
         header: () => {
             return renderSnippet(
@@ -90,7 +107,7 @@ export const columns: ColumnDef<Entry>[] = [
 					const { priority } = getPriority();
 					return {
 						render: () =>
-							`<div class="text-right tabular-nums">${priority}</div>`,
+							`<div class="text-right tabular-nums">${Math.round(priority)}</div>`,
 					};
 				}
 			)

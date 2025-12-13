@@ -1,4 +1,4 @@
-import type { EntryStatus } from './db';
+import type { EntryStatus, EntryInterest } from './db';
 
 export interface Entry {
     id: number;
@@ -8,6 +8,7 @@ export interface Entry {
     // Priority
     score: number;
     duration: number;
+	interest: EntryInterest;
     priority: number;
 
     // Dates

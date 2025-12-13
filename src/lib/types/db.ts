@@ -4,11 +4,17 @@ export interface Backlog {
 }
 
 export enum EntryStatus {
-	Pending,
-	Started,
-	Dropped,
-	Finished,
-	Completed
+	Pending = 'pending',
+	Started = 'started',
+	Dropped = 'dropped',
+	Finished = 'finished',
+	Completed = 'completed'
+}
+
+export enum EntryInterest {
+	Low = 'low',
+	Neutral = 'neutral',
+	High = 'high'
 }
 
 export interface EntryRow {
@@ -19,6 +25,7 @@ export interface EntryRow {
 
     score: number;
     duration: number;
+	interest: EntryInterest;
 
     created_at: number; 
     started_at: number | null;

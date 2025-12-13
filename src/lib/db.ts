@@ -34,7 +34,7 @@ export const initDB = async () => {
     };
 
     worker.postMessage({ type: 'INIT' });
-    
+
     await new Promise(r => setTimeout(r, 500)); 
 };
 

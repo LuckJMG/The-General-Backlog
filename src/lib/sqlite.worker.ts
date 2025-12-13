@@ -37,6 +37,7 @@ const init = async () => {
                 title TEXT NOT NULL,
                 score REAL NOT NULL DEFAULT 1.0,
                 duration REAL NOT NULL DEFAULT 1.0,
+				interest TEXT CHECK(interest IN ('low', 'neutral', 'high')) DEFAULT 'neutral',
                 status TEXT CHECK(status IN ('pending', 'started', 'dropped', 'finished', 'completed')) DEFAULT 'pending',
 
 				-- Dates

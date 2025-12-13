@@ -3,21 +3,21 @@ import { query } from '$lib/db';
 const sql = (strings: TemplateStringsArray, ...values: any[]) => String.raw({ raw: strings }, ...values);
 
 const GAMES = [
-    { title: "Hollow Knight: Silksong", score: 0, duration: 30, status: "pending" },
-    { title: "Elden Ring", score: 10, duration: 120, status: "completed", review: "Obra maestra absoluta." },
-    { title: "Cyberpunk 2077", score: 8, duration: 60, status: "finished" },
-    { title: "Baldur's Gate 3", score: 10, duration: 150, status: "started" },
-    { title: "Starfield", score: 6, duration: 40, status: "dropped", review: "Muy repetitivo." },
-    { title: "Hades II", score: 9, duration: 25, status: "completed" },
-    { title: "Celeste", score: 10, duration: 15, status: "completed" },
-    { title: "Factorio", score: 9, duration: 500, status: "started" }
+    { title: "Hollow Knight: Silksong", score: 0, duration: 30, interest: "high", status: "pending" },
+    { title: "Elden Ring", score: 10, duration: 120, interest: "low", status: "completed", review: "Obra maestra absoluta." },
+    { title: "Cyberpunk 2077", score: 8, duration: 60, interest: "low", status: "finished" },
+    { title: "Baldur's Gate 3", score: 10, duration: 150, interest: "neutral", status: "started" },
+    { title: "Starfield", score: 6, duration: 40, interest: "low", status: "dropped", review: "Muy repetitivo." },
+    { title: "Hades II", score: 9, duration: 25, interest: "neutral", status: "completed" },
+    { title: "Celeste", score: 10, duration: 15, interest: "high", status: "completed" },
+    { title: "Factorio", score: 9, duration: 500, interest: "high", status: "started" }
 ];
 
 const MOVIES = [
-    { title: "Dune: Part Two", score: 9, duration: 166, status: "completed" },
-    { title: "Oppenheimer", score: 9, duration: 180, status: "finished" },
-    { title: "Madame Web", score: 2, duration: 116, status: "dropped" },
-    { title: "Interstellar", score: 10, duration: 169, status: "completed" }
+    { title: "Dune: Part Two", score: 9, duration: 166, interest: "high", status: "completed" },
+    { title: "Oppenheimer", score: 9, duration: 180, interest: "neutral", status: "finished" },
+    { title: "Madame Web", score: 2, duration: 116, interest: "low", status: "dropped" },
+    { title: "Interstellar", score: 10, duration: 169, interest: "high", status: "completed" }
 ];
 
 const randomDate = (start: Date, end: Date) => {
@@ -52,10 +52,14 @@ export const seedDatabase = async () => {
         const statusPool = ['pending', 'started', 'finished', 'completed', 'dropped'];
         const randomStatus = statusPool[Math.floor(Math.random() * statusPool.length)];
 
+        const interestPool = ['low', 'neutral', 'high'];
+        const randomInterest = interestPool[Math.floor(Math.random() * interestPool.length)];
+
         await insertMockEntry(1, {
             title: `Generic Indie #${i}`,
             score: Math.floor(Math.random() * 10),
             duration: Math.floor(Math.random() * 50) + 1,
+            interest: randomInterest,
             status: randomStatus,
             review: Math.random() > 0.7 ? "Automatic generated review." : ""
         });
@@ -76,11 +80,11 @@ async function insertMockEntry(backlogId: number, data: any) {
     let ranking: number | null = null;
 
     if (data.status !== 'pending') {
-        started_at = created_at + 86400; // Started 1 day after creation
+        started_at = created_at + 86400; 
     }
 
     if (['finished', 'completed', 'dropped'].includes(data.status)) {
-        finished_at = (started_at || created_at) + (data.duration * 60); // Finished after X time
+        finished_at = (started_at || created_at) + (data.duration * 60); 
     }
 
     if (['finished', 'completed'].includes(data.status)) {
@@ -89,15 +93,16 @@ async function insertMockEntry(backlogId: number, data: any) {
 
     await query(sql`
         INSERT INTO entries (
-            backlog_id, title, score, duration, status, 
+            backlog_id, title, score, duration, interest, status, 
             created_at, started_at, finished_at, 
             rating, review, ranking
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
         backlogId,
         data.title,
         data.score,
         data.duration,
+        data.interest,
         data.status,
         created_at,
         started_at,

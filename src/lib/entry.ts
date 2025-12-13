@@ -1,16 +1,39 @@
 import { sql, query } from '$lib/db';
-import { type EntryRow, EntryStatus } from './types/db';
+import { type EntryRow, EntryStatus, EntryInterest } from './types/db';
 import { type Entry, type EntryInput } from './types/domain';
 import { mapEntry } from './utils/mappers';
 
 export const getEntries = async (backlogId: number): Promise<Entry[]> => {
     const rows = await query(sql`
-        SELECT * FROM entries 
-        WHERE backlog_id = ? 
-        ORDER BY created_at DESC
-    `, [backlogId]) as EntryRow[];
+        WITH raw_data AS (
+            SELECT
+                *,
+                -- Priority
+                (CAST(score AS REAL) / NULLIF(duration, 0)) * CASE interest 
+                    WHEN 'high' THEN 1.25
+                    WHEN 'low' THEN 0.75
+                    ELSE 1.0
+                END as priority
+            FROM entries
+            WHERE backlog_id = ?
+        ),
+        stats AS (
+            -- Get priority limits
+            SELECT MIN(priority) as min_priority, MAX(priority) as max_priority
+            FROM raw_data
+        )
+        SELECT 
+            r.*,
+            -- Normalization
+            CASE 
+                WHEN s.max_priority = s.min_priority THEN 100 -- Avoid division by 0 with one item
+                ELSE ((r.priority - s.min_priority) / (s.max_priority - s.min_priority)) * 100
+            END as normalized_priority
+        FROM raw_data r, stats s
+        ORDER BY normalized_priority DESC
+    `, [backlogId]) as (EntryRow & { normalized_priority: number })[];
 
-    return rows.map(mapEntry);
+    return rows.map(row => mapEntry(row, row.normalized_priority));
 };
 
 export const getRanking = async (backlogId: number): Promise<Entry[]> => {
@@ -37,6 +60,7 @@ export const createEntry = async (backlogId: number, entry: EntryInput): Promise
 export const updateEntry = async (
     id: number, 
     entry: Partial<EntryInput> & { 
+        interest?: EntryInterest; 
         rating?: number; 
         review?: string; 
         ranking?: number;
@@ -51,6 +75,7 @@ export const updateEntry = async (
     if (entry.title !== undefined) { updates.push("title = ?"); values.push(entry.title); }
     if (entry.score !== undefined) { updates.push("score = ?"); values.push(entry.score); }
     if (entry.duration !== undefined) { updates.push("duration = ?"); values.push(entry.duration); }
+    if (entry.interest !== undefined) { updates.push("interest = ?"); values.push(entry.interest); }
     if (entry.rating !== undefined) { updates.push("rating = ?"); values.push(entry.rating); }
     if (entry.review !== undefined) { updates.push("review = ?"); values.push(entry.review); }
     if (entry.ranking !== undefined) { updates.push("ranking = ?"); values.push(entry.ranking); }

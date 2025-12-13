@@ -1,16 +1,17 @@
-import type { EntryRow } from '$lib/types/db';
+import { type EntryRow } from '$lib/types/db';
 import type { Entry } from '$lib/types/domain';
 
-export const mapEntry = (row: EntryRow): Entry => {
-    return {
+export const mapEntry = (row: EntryRow, preCalculatedPriority?: number): Entry => {
+	return {
         id: row.id,
         title: row.title,
         status: row.status,
 
         score: row.score,
         duration: row.duration,
+		interest: row.interest,
 
-        priority: row.duration > 0 ? row.score / row.duration : 0,
+		priority: preCalculatedPriority ?? 0,
 
         createdAt: new Date(row.created_at * 1000),
         startedAt: row.started_at ? new Date(row.started_at * 1000) : null,
