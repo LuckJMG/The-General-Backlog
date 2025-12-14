@@ -4,6 +4,9 @@ import { page } from '$app/state';
 import {
 	type ColumnDef,
 	getCoreRowModel,
+    type SortingState,
+	type OnChangeFn
+
 } from "@tanstack/table-core";
 import {
 	createSvelteTable,
@@ -22,22 +25,53 @@ type DataTableProps<TData, TValue> = {
 
 let { data, columns, totalCount, pageIndex, pageSize }: DataTableProps<TData, TValue> = $props();
 
+let sortBy = $derived(page.url.searchParams.get('sortBy') || 'priority');
+let sortDir = $derived(page.url.searchParams.get('sortOrder') || 'desc');
+
+let sorting = $derived<SortingState>([
+	{
+		id: sortBy,
+		desc: sortDir === 'desc'
+	}
+]);
+
+const setSorting: OnChangeFn<SortingState> = (updater) => {
+	let newSortingState = typeof updater === "function" ? updater(sorting) : updater;
+	let params = new URLSearchParams(page.url.searchParams);
+
+	if (newSortingState.length > 0) {
+		let rule = newSortingState[0];
+		params.set('sortBy', rule.id);
+		params.set('sortOrder', rule.desc ? 'desc' : 'asc');
+	} else {
+		params.delete('sortBy');
+		params.delete('sortOrder');
+	}
+
+	goto(`?${params.toString()}`, { keepFocus: true });
+};
+
 const table = createSvelteTable({
 	get data() { return data; },
 	get columns() { return columns; },
 	getCoreRowModel: getCoreRowModel(),
 
 	manualPagination: true,
+	manualSorting: true,
 	get rowCount() { return totalCount; }, 
 
 	state: {
-		get pagination() { 
-			return { 
-				pageIndex: pageIndex, 
-				pageSize: pageSize 
-			}; 
+		get pagination() {
+			return {
+				pageIndex: pageIndex,
+				pageSize: pageSize
+			};
+		},
+		get sorting() {
+			return sorting;
 		},
 	},
+	onSortingChange: setSorting,
 });
 
 const handlePageChange = (newPage: number) => {

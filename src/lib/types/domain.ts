@@ -35,3 +35,12 @@ export interface PaginatedResult<T> {
 	pageSize: number;
 }
 
+export const SORT_MAPPING: Record<string, string> = {
+    title: 'title',
+    status: 'status',
+    score: 'score',
+    duration: 'duration',
+    interest: 'interest',
+    priority: 'normalized_priority'
+};
+

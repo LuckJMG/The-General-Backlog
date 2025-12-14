@@ -1,14 +1,24 @@
 import { sql, query } from '$lib/db';
 import { type EntryRow, EntryStatus, EntryInterest } from './types/db';
-import { type Entry, type EntryInput, type PaginatedResult } from './types/domain';
+import {
+	type Entry,
+	type EntryInput,
+	type PaginatedResult,
+	SORT_MAPPING
+} from './types/domain';
 import { mapEntry } from './utils/mappers';
 
 export const getEntries = async (
 	backlogId: number,
 	page: number = 1,
-	pageSize: number = 10
+	pageSize: number = 10,
+	sortBy: string = 'priority',
+	sortDir: 'asc' | 'desc' = 'desc'
 ): Promise<PaginatedResult<Entry>> => {
 	let offset = (page - 1) * pageSize;
+
+	let dbColumn = SORT_MAPPING[sortBy] || 'normalized_priority';
+	let dbDirection = sortDir === 'asc' ? 'ASC' : 'DESC';
 
     let rows = await query(sql`
         WITH raw_data AS (
@@ -38,7 +48,7 @@ export const getEntries = async (
 
 			COUNT(*) OVER() as total_count
         FROM raw_data r, stats s
-        ORDER BY normalized_priority DESC
+        ORDER BY ${dbColumn} ${dbDirection}
 		LIMIT ? OFFSET ?
     `, [backlogId, pageSize, offset]) as (EntryRow & { normalized_priority: number, total_count: number })[];
 

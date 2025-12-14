@@ -4,21 +4,26 @@ import { renderSnippet, renderComponent } from "$lib/components/ui/data-table/in
 import type { Entry } from "$lib/types/domain";
 import StatusCell from "./status-cell.svelte";
 import InterestCell from "./interest-cell.svelte";
+import SortButton from "./sort-button.svelte";
 
 export const columns: ColumnDef<Entry>[] = [
     {
         accessorKey: "title",
-        header: "Title",
+        header: ({ column }) => renderComponent(SortButton, {
+			title: "Title",
+			sortDir: column.getIsSorted(),
+            onclick: column.getToggleSortingHandler(),
+            align: "left",
+		}),
     },
     {
         accessorKey: "status",
-        header: () => {
-            return renderSnippet(
-                createRawSnippet(() => ({
-                    render: () => `<div class="text-center w-full font-semibold">Status</div>`,
-                }))
-            );
-        },
+        header: ({ column }) => renderComponent(SortButton, {
+			title: "Status",
+			sortDir: column.getIsSorted(),
+            onclick: column.getToggleSortingHandler(),
+            align: "center",
+		}),
         cell: ({ row }) => {
             return renderComponent(StatusCell, {
                 value: row.getValue("status"),
@@ -28,13 +33,12 @@ export const columns: ColumnDef<Entry>[] = [
     },
     {
         accessorKey: "score",
-        header: () => {
-            return renderSnippet(
-                createRawSnippet(() => ({
-                    render: () => `<div class="text-center w-full font-semibold">Score</div>`,
-                }))
-            );
-        },
+        header: ({ column }) => renderComponent(SortButton, {
+			title: "Score",
+			sortDir: column.getIsSorted(),
+            onclick: column.getToggleSortingHandler(),
+            align: "center",
+		}),
         cell: ({ row }) => {
 			const scoreCellSnippet = createRawSnippet<[{ score: number }]>(
 				(getDuration) => {
@@ -53,13 +57,12 @@ export const columns: ColumnDef<Entry>[] = [
     },
     {
         accessorKey: "duration",
-        header: () => {
-            return renderSnippet(
-                createRawSnippet(() => ({
-                    render: () => `<div class="text-center w-full font-semibold">Duration</div>`,
-                }))
-            );
-        },
+        header: ({ column }) => renderComponent(SortButton, {
+			title: "Duration",
+			sortDir: column.getIsSorted(),
+            onclick: column.getToggleSortingHandler(),
+            align: "center",
+		}),
         cell: ({ row }) => {
 			const durationCellSnippet = createRawSnippet<[{ duration: number }]>(
 				(getDuration) => {
@@ -78,13 +81,12 @@ export const columns: ColumnDef<Entry>[] = [
     },
     {
         accessorKey: "interest",
-        header: () => {
-            return renderSnippet(
-                createRawSnippet(() => ({
-                    render: () => `<div class="text-center w-full font-semibold">Interest</div>`,
-                }))
-            );
-        },
+        header: ({ column }) => renderComponent(SortButton, {
+			title: "Interest",
+			sortDir: column.getIsSorted(),
+            onclick: column.getToggleSortingHandler(),
+            align: "center",
+		}),
         cell: ({ row }) => {
             return renderComponent(InterestCell, {
                 value: row.getValue("interest"),
@@ -94,13 +96,12 @@ export const columns: ColumnDef<Entry>[] = [
     },
     {
         accessorKey: "priority",
-        header: () => {
-            return renderSnippet(
-                createRawSnippet(() => ({
-                    render: () => `<div class="text-center w-full font-semibold">Priority</div>`,
-                }))
-            );
-        },
+        header: ({ column }) => renderComponent(SortButton, {
+			title: "Priority",
+			sortDir: column.getIsSorted(),
+            onclick: column.getToggleSortingHandler(),
+            align: "center",
+		}),
         cell: ({ row }) => {
 			const priorityCellSnippet = createRawSnippet<[{ priority: number }]>(
 				(getPriority) => {
