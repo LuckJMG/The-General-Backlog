@@ -4,32 +4,56 @@
     import { seedDatabase } from "$lib/seed";
     import { Button } from "$lib/components/ui/button";
     import { invalidateAll } from "$app/navigation";
+    import BacklogSwitcher from "./components/backlog-switcher.svelte";
+    import CreateBacklogDialog from "./components/create-backlog-dialog.svelte";
+    import EditBacklogDialog from "./components/edit-backlog-dialog.svelte";
+    import * as ButtonGroup from "$lib/components/ui/button-group";
 
     let { data } = $props();
 </script>
 
-<div class="container mx-auto py-10 space-y-4">
-    <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Games Backlog</h1>
+<div class="container mx-auto py-10 space-y-6">
+    <div class="flex justify-between items-start">
+        <div class="flex items-center gap-2">
+			<ButtonGroup.Root>
+				<BacklogSwitcher 
+					backlogs={data.backlogs} 
+					activeBacklogId={data.activeBacklog?.id} 
+				/>
+
+				{#if data.activeBacklog}
+					<EditBacklogDialog backlog={data.activeBacklog} />
+				{/if}
+
+				<CreateBacklogDialog />
+			</ButtonGroup.Root>
+        </div>
 
         <Button 
             variant="destructive" 
             onclick={async () => {
                 if(confirm('Delete DB and generate test data?')) {
                     await seedDatabase();
-                    await invalidateAll(); 
+                    await invalidateAll();
                 }
             }}
         >
-            Reset & Seed Data
+            ⚠️ Reset & Seed
         </Button>
     </div>
 
-	<DataTable 
-		data={data.entries.data} 
-		columns={columns}
-		totalCount={data.entries.total}
-		pageIndex={data.entries.page - 1} 
-		pageSize={data.entries.pageSize}
-	/>
+    {#if data.activeBacklog}
+        <DataTable
+            data={data.entries.data}
+            columns={columns}
+            totalCount={data.entries.total}
+            pageIndex={data.entries.page - 1}
+            pageSize={data.entries.pageSize}
+        />
+    {:else}
+        <div class="flex flex-col items-center justify-center h-64 border rounded-md bg-muted/10">
+            <p class="text-lg font-medium text-muted-foreground mb-4">There are no backlogs.</p>
+            <CreateBacklogDialog />
+        </div>
+    {/if}
 </div>
