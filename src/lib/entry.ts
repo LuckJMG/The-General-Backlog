@@ -1,10 +1,16 @@
 import { sql, query } from '$lib/db';
 import { type EntryRow, EntryStatus, EntryInterest } from './types/db';
-import { type Entry, type EntryInput } from './types/domain';
+import { type Entry, type EntryInput, type PaginatedResult } from './types/domain';
 import { mapEntry } from './utils/mappers';
 
-export const getEntries = async (backlogId: number): Promise<Entry[]> => {
-    const rows = await query(sql`
+export const getEntries = async (
+	backlogId: number,
+	page: number = 1,
+	pageSize: number = 10
+): Promise<PaginatedResult<Entry>> => {
+	let offset = (page - 1) * pageSize;
+
+    let rows = await query(sql`
         WITH raw_data AS (
             SELECT
                 *,
@@ -28,12 +34,23 @@ export const getEntries = async (backlogId: number): Promise<Entry[]> => {
             CASE 
                 WHEN s.max_priority = s.min_priority THEN 100 -- Avoid division by 0 with one item
                 ELSE ((r.priority - s.min_priority) / (s.max_priority - s.min_priority)) * 100
-            END as normalized_priority
+            END as normalized_priority,
+
+			COUNT(*) OVER() as total_count
         FROM raw_data r, stats s
         ORDER BY normalized_priority DESC
-    `, [backlogId]) as (EntryRow & { normalized_priority: number })[];
+		LIMIT ? OFFSET ?
+    `, [backlogId, pageSize, offset]) as (EntryRow & { normalized_priority: number, total_count: number })[];
 
-    return rows.map(row => mapEntry(row, row.normalized_priority));
+    let entries = rows.map(row => mapEntry(row, row.normalized_priority));
+	let total = rows.length > 0 ? rows[0].total_count : 0;
+
+	return {
+		data: entries,
+		total,
+		page,
+		pageSize
+	}
 };
 
 export const getRanking = async (backlogId: number): Promise<Entry[]> => {

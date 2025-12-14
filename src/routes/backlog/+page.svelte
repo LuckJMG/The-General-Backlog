@@ -25,5 +25,11 @@
         </Button>
     </div>
 
-    <DataTable data={data.entries} {columns} />
+	<DataTable 
+		data={data.entries.data} 
+		columns={columns}
+		totalCount={data.entries.total}
+		pageIndex={data.entries.page - 1} 
+		pageSize={data.entries.pageSize}
+	/>
 </div>
