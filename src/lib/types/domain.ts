@@ -26,6 +26,13 @@ export interface EntryInput {
     title: string;
     score: number;
     duration: number;
+	interest?: EntryInterest;
+	status?: EntryStatus;
+	review?: string;
+	rating?: number;
+	createdAt?: Date;
+    startedAt?: Date | null;
+    finishedAt?: Date | null;
 }
 
 export interface PaginatedResult<T> {

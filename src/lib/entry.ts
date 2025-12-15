@@ -1,5 +1,5 @@
 import { sql, query } from '$lib/db';
-import { type EntryRow, EntryStatus, EntryInterest } from './types/db';
+import { type EntryRow, EntryStatus } from './types/db';
 import {
 	type Entry,
 	type EntryInput,
@@ -75,11 +75,35 @@ export const getRanking = async (backlogId: number): Promise<Entry[]> => {
 };
 
 export const createEntry = async (backlogId: number, entry: EntryInput): Promise<Entry> => {
-    const rows = await query(sql`
-        INSERT INTO entries (backlog_id, title, score, duration)
-        VALUES (?, ?, ?, ?)
+    const columns = ['backlog_id', 'title', 'score', 'duration'];
+    const values: any[] = [backlogId, entry.title, entry.score, entry.duration];
+
+    if (entry.interest) { columns.push('interest'); values.push(entry.interest); }
+    if (entry.status) { columns.push('status'); values.push(entry.status); }
+    if (entry.review) { columns.push('review'); values.push(entry.review); }
+    if (entry.rating !== undefined) { columns.push('rating'); values.push(entry.rating); }
+
+    if (entry.createdAt) { 
+        columns.push('created_at'); 
+        values.push(Math.floor(entry.createdAt.getTime() / 1000)); 
+    }
+    if (entry.startedAt) { 
+        columns.push('started_at'); 
+        values.push(Math.floor(entry.startedAt.getTime() / 1000)); 
+    }
+    if (entry.finishedAt) { 
+        columns.push('finished_at'); 
+        values.push(Math.floor(entry.finishedAt.getTime() / 1000)); 
+    }
+
+    const placeholders = values.map(() => '?').join(', ');
+    const colStr = columns.join(', ');
+
+    const rows = await query(`
+        INSERT INTO entries (${colStr})
+        VALUES (${placeholders})
         RETURNING *
-    `, [backlogId, entry.title, entry.score, entry.duration]) as EntryRow[];
+    `, values) as EntryRow[];
 
     return mapEntry(rows[0]);
 };
@@ -87,10 +111,6 @@ export const createEntry = async (backlogId: number, entry: EntryInput): Promise
 export const updateEntry = async (
     id: number, 
     entry: Partial<EntryInput> & { 
-        interest?: EntryInterest; 
-        rating?: number; 
-        review?: string; 
-        ranking?: number;
         createdAt?: Date;
         startedAt?: Date | null;
         finishedAt?: Date | null;
@@ -103,9 +123,9 @@ export const updateEntry = async (
     if (entry.score !== undefined) { updates.push("score = ?"); values.push(entry.score); }
     if (entry.duration !== undefined) { updates.push("duration = ?"); values.push(entry.duration); }
     if (entry.interest !== undefined) { updates.push("interest = ?"); values.push(entry.interest); }
+    if (entry.status !== undefined) { updates.push("status = ?"); values.push(entry.status); }
     if (entry.rating !== undefined) { updates.push("rating = ?"); values.push(entry.rating); }
     if (entry.review !== undefined) { updates.push("review = ?"); values.push(entry.review); }
-    if (entry.ranking !== undefined) { updates.push("ranking = ?"); values.push(entry.ranking); }
 
     if (entry.createdAt !== undefined) { 
         updates.push("created_at = ?"); 

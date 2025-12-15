@@ -4,7 +4,7 @@ import { page } from '$app/state';
 import {
 	type ColumnDef,
 	getCoreRowModel,
-    type SortingState,
+	type SortingState,
 	type OnChangeFn
 
 } from "@tanstack/table-core";
@@ -21,9 +21,10 @@ type DataTableProps<TData, TValue> = {
 	totalCount: number;
 	pageIndex: number;  // 0-based
 	pageSize: number;
+	onRowClick?: (row: TData) => void;
 };
 
-let { data, columns, totalCount, pageIndex, pageSize }: DataTableProps<TData, TValue> = $props();
+let { data, columns, totalCount, pageIndex, pageSize, onRowClick }: DataTableProps<TData, TValue> = $props();
 
 let sortBy = $derived(page.url.searchParams.get('sortBy') || 'priority');
 let sortDir = $derived(page.url.searchParams.get('sortOrder') || 'desc');
@@ -105,7 +106,11 @@ const handlePageChange = (newPage: number) => {
 			</Table.Header>
 			<Table.Body>
 				{#each table.getRowModel().rows as row (row.id)}
-					<Table.Row data-state={row.getIsSelected() && "selected"}>
+					<Table.Row 
+						data-state={row.getIsSelected() && "selected"}
+						class={onRowClick ? "cursor-pointer hover:bg-muted/50 transition-colors" : ""}
+						onclick={() => onRowClick?.(row.original)}
+					>
 						{#each row.getVisibleCells() as cell (cell.id)}
 							<Table.Cell>
 								<FlexRender
@@ -145,8 +150,8 @@ const handlePageChange = (newPage: number) => {
 						</Pagination.Item>
 					{:else}
 						<Pagination.Item>
-							<Pagination.Link 
-								{page} 
+							<Pagination.Link
+								{page}
 								isActive={currentPage === page.value}
 							>
 								{page.value}
