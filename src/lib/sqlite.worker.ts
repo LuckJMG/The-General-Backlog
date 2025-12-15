@@ -38,7 +38,7 @@ const init = async () => {
                 score REAL NOT NULL DEFAULT 1.0,
                 duration REAL NOT NULL DEFAULT 1.0,
 				interest TEXT CHECK(interest IN ('low', 'neutral', 'high')) DEFAULT 'neutral',
-                status TEXT CHECK(status IN ('pending', 'started', 'dropped', 'finished', 'completed')) DEFAULT 'pending',
+                status TEXT CHECK(status IN ('pending', 'started', 'dropped', 'finished')) DEFAULT 'pending',
 
 				-- Dates
                 created_at INTEGER DEFAULT (unixepoch()),

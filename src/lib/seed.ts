@@ -4,20 +4,20 @@ const sql = (strings: TemplateStringsArray, ...values: any[]) => String.raw({ ra
 
 const GAMES = [
     { title: "Hollow Knight: Silksong", score: 0, duration: 30, interest: "high", status: "pending" },
-    { title: "Elden Ring", score: 10, duration: 120, interest: "low", status: "completed", review: "Obra maestra absoluta." },
+    { title: "Elden Ring", score: 10, duration: 120, interest: "low", status: "pending", review: "Obra maestra absoluta." },
     { title: "Cyberpunk 2077", score: 8, duration: 60, interest: "low", status: "finished" },
     { title: "Baldur's Gate 3", score: 10, duration: 150, interest: "neutral", status: "started" },
     { title: "Starfield", score: 6, duration: 40, interest: "low", status: "dropped", review: "Muy repetitivo." },
-    { title: "Hades II", score: 9, duration: 25, interest: "neutral", status: "completed" },
-    { title: "Celeste", score: 10, duration: 15, interest: "high", status: "completed" },
+    { title: "Hades II", score: 9, duration: 25, interest: "neutral", status: "finished" },
+    { title: "Celeste", score: 10, duration: 15, interest: "high", status: "dropped" },
     { title: "Factorio", score: 9, duration: 500, interest: "high", status: "started" }
 ];
 
 const MOVIES = [
-    { title: "Dune: Part Two", score: 9, duration: 166, interest: "high", status: "completed" },
+    { title: "Dune: Part Two", score: 9, duration: 166, interest: "high", status: "pending" },
     { title: "Oppenheimer", score: 9, duration: 180, interest: "neutral", status: "finished" },
     { title: "Madame Web", score: 2, duration: 116, interest: "low", status: "dropped" },
-    { title: "Interstellar", score: 10, duration: 169, interest: "high", status: "completed" }
+    { title: "Interstellar", score: 10, duration: 169, interest: "high", status: "pending" }
 ];
 
 const randomDate = (start: Date, end: Date) => {
@@ -49,7 +49,7 @@ export const seedDatabase = async () => {
 
     // 5. Generate bulk data
     for (let i = 1; i <= 20; i++) {
-        const statusPool = ['pending', 'started', 'finished', 'completed', 'dropped'];
+        const statusPool = ['pending', 'started', 'finished', 'dropped'];
         const randomStatus = statusPool[Math.floor(Math.random() * statusPool.length)];
 
         const interestPool = ['low', 'neutral', 'high'];
@@ -83,11 +83,11 @@ async function insertMockEntry(backlogId: number, data: any) {
         started_at = created_at + 86400; 
     }
 
-    if (['finished', 'completed', 'dropped'].includes(data.status)) {
+    if (['finished', 'dropped'].includes(data.status)) {
         finished_at = (started_at || created_at) + (data.duration * 60); 
     }
 
-    if (['finished', 'completed'].includes(data.status)) {
+    if (data.status === 'finished') {
         ranking = Math.random() > 0.5 ? Math.floor(Math.random() * 100) / 10 : null;
     }
 

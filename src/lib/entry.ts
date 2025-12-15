@@ -67,7 +67,7 @@ export const getRanking = async (backlogId: number): Promise<Entry[]> => {
     const rows = await query(sql`
         SELECT * FROM entries 
         WHERE backlog_id = ? 
-        AND status IN ('finished', 'completed')
+        AND status = 'finished'
         ORDER BY ranking ASC
     `, [backlogId]) as EntryRow[];
 
@@ -134,7 +134,7 @@ export const updateEntryStatus = async (id: number, newStatus: EntryStatus): Pro
 
     if (newStatus === EntryStatus.Started) {
         update = ", started_at = COALESCE(started_at, unixepoch())";
-    } else if (newStatus === EntryStatus.Finished || newStatus === EntryStatus.Completed) {
+    } else if (newStatus === EntryStatus.Finished) {
         update = ", finished_at = unixepoch()";
     }
 

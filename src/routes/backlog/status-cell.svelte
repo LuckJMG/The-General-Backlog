@@ -4,7 +4,6 @@
 	let { value, class: className } = $props<{ value: string, class?: string }>();
 
 	const colors: Record<string, string> = {
-		completed: "bg-purple-300 border-transparent text-white",
 		finished: "bg-blue-300 border-transparent text-white",
 		started: "bg-green-300 border-transparent text-white",
 		dropped: "bg-red-300 border-transparent text-white",

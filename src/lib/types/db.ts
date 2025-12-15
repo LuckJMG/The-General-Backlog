@@ -8,7 +8,6 @@ export enum EntryStatus {
 	Started = 'started',
 	Dropped = 'dropped',
 	Finished = 'finished',
-	Completed = 'completed'
 }
 
 export enum EntryInterest {
