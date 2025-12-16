@@ -15,8 +15,12 @@ import {
 import * as Table from "$lib/components/ui/table/index";
 import * as Pagination from "$lib/components/ui/pagination";
 import * as InputGroup from "$lib/components/ui/input-group";
+import * as Select from '$lib/components/ui/select';
 import SearchIcon from "@lucide/svelte/icons/search";
 import X from '@lucide/svelte/icons/x';
+import { EntryStatus, EntryInterest } from '$lib/types/db';
+import StatusCell from './status-cell.svelte';
+import InterestCell from './interest-cell.svelte';
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -63,9 +67,42 @@ const onSearch = () => {
 	let params = new URLSearchParams(page.url.searchParams);
 
 	search === '' ? params.delete('search') : params.set('search', search);
-	pageIndex = 1;
+	params.set('page', '1');
 
 	goto(`?${params.toString()}`, { keepFocus: true, replaceState: true });
+}
+
+let statusFilter = $state<string>(page.url.searchParams.get('status') || '');
+let interestFilter = $state<string>(page.url.searchParams.get('interest') || '');
+
+const onFilterChange = (key: 'status' | 'interest', value: string) => {
+	let params = new URLSearchParams(page.url.searchParams);
+
+	if (value) {
+		params.set(key, value);
+	} else {
+		params.delete(key);
+	}
+
+	params.set('page', '1');
+
+	goto(`?${params.toString()}`, { keepFocus: true, replaceState: true });
+}
+
+const clearAll = () => {
+	search = '';
+	statusFilter = '';
+	interestFilter = '';
+	
+	// Reset params
+	let params = new URLSearchParams(page.url.searchParams);
+	params.delete('search');
+	params.delete('status');
+	params.delete('interest');
+	params.set('page', '1');
+
+	goto(`?${params.toString()}`, { keepFocus: true });
+	searchInput?.focus();
 }
 
 const table = createSvelteTable({
@@ -102,37 +139,90 @@ const handlePageChange = (newPage: number) => {
 </script>
 
 <div class="space-y-4">
-	<div class="flex justify-berween items-start mb-4">
-		<InputGroup.Root class='max-w-xs w-full'>
-			<InputGroup.Input
-				bind:ref={searchInput}
-				placeholder="Search..."
-				bind:value={search}
-				oninput={() => {
-					clearTimeout(timer);
-					timer = setTimeout(onSearch, 300);
-				}}
-				class="pl-2"
-			/>
-			<InputGroup.Addon>
-				<SearchIcon class='size-4 text-muted-foreground'/>
-			</InputGroup.Addon>
-			{#if search !== ''}
-				<InputGroup.Addon align='inline-end'>
-					<button
-						onclick={() => {
-							search = '';
-							onSearch();
-							searchInput?.focus();
-						}}
-						class="text-muted-foreground hover:text-foreground transition-colors p-1"
-						aria-label="Clear search"
-					>
-						<X class="hover:cursor-pointer size-4" />
-					</button>
+	<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-2">
+		<div class="flex flex-1 flex-wrap items-center gap-2 w-full">
+			<InputGroup.Root class='max-w-[250px] w-full'>
+				<InputGroup.Input
+					bind:ref={searchInput}
+					placeholder="Search..."
+					bind:value={search}
+					oninput={() => {
+						clearTimeout(timer);
+						timer = setTimeout(onSearch, 300);
+					}}
+					class="h-8"
+				/>
+				<InputGroup.Addon>
+					<SearchIcon class='size-4 text-muted-foreground'/>
 				</InputGroup.Addon>
+				{#if search !== ''}
+					<InputGroup.Addon align='inline-end'>
+						<button
+							onclick={() => {
+								search = '';
+								onSearch();
+								searchInput?.focus();
+							}}
+							class="text-muted-foreground hover:text-foreground transition-colors p-1"
+							aria-label="Clear search"
+						>
+							<X class="hover:cursor-pointer size-4" />
+						</button>
+					</InputGroup.Addon>
+				{/if}
+			</InputGroup.Root>
+
+			<Select.Root
+				type="single"
+				bind:value={statusFilter}
+				onValueChange={(v) => onFilterChange('status', v)}
+			>
+				<Select.Trigger class="h-8 w-[140px] relative">
+					{#if statusFilter && Object.values(EntryStatus).includes(statusFilter as EntryStatus)}
+						<StatusCell value={statusFilter as EntryStatus} />
+					{:else}
+						<span class="text-muted-foreground text-xs font-medium border-dashed">Status</span>
+					{/if}
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Group>
+						<Select.Label>Status</Select.Label>
+						{#each Object.values(EntryStatus) as status}
+							<Select.Item value={status} label={status} class="text-xs">
+								<StatusCell value={status} />
+							</Select.Item>
+						{/each}
+					</Select.Group>
+				</Select.Content>
+			</Select.Root>
+
+			<Select.Root type="single" bind:value={interestFilter} onValueChange={(v) => onFilterChange('interest', v)}>
+                <Select.Trigger class="h-8 w-[140px] relative">
+                    {#if interestFilter && Object.values(EntryInterest).includes(interestFilter as EntryInterest)}
+                        <InterestCell value={interestFilter as EntryInterest} />
+                    {:else}
+                         <span class="text-muted-foreground text-xs font-medium border-dashed">Interest</span>
+                    {/if}
+                </Select.Trigger>
+                <Select.Content>
+                    <Select.Group>
+                        <Select.Label>Interests</Select.Label>
+                        {#each Object.values(EntryInterest) as interest}
+                            <Select.Item value={interest} label={interest} class="text-xs">
+                                <InterestCell value={interest} />
+                            </Select.Item>
+                        {/each}
+                    </Select.Group>
+                </Select.Content>
+            </Select.Root>
+
+			{#if search !== '' || statusFilter !== '' || interestFilter !== ''}
+				<button onclick={clearAll} class="h-8 px-2 lg:px-3 text-sm font-medium hover:bg-muted text-muted-foreground transition-colors rounded-md flex items-center gap-1">
+					Reset
+					<X class="size-3" />
+				</button>
 			{/if}
-		</InputGroup.Root>
+		</div>
 	</div>
 
 	<div class="rounded-md border">

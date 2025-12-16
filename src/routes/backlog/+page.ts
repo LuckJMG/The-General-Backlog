@@ -1,6 +1,7 @@
 import { getEntries } from '$lib/entry';
 import { getBacklogs } from '$lib/backlog';
 import type { PageLoad } from './$types';
+import type { EntryInterest, EntryStatus } from '$lib/types/db';
 
 export const load: PageLoad = async ({ url }) => {
 	// Backlog
@@ -19,8 +20,21 @@ export const load: PageLoad = async ({ url }) => {
 	// Search
 	let search = (url.searchParams.get('search') || '').trim();
 
+	// Filters
+	let statusFilter = url.searchParams.get('status') as EntryStatus || null;
+	let interestFilter = url.searchParams.get('interest') as EntryInterest || null;
+
     let paginatedResult = activeBacklog
-		? await getEntries(activeBacklog.id, page, pageSize, sortBy, sortDir, search)
+		? await getEntries(
+			activeBacklog.id,
+			page,
+			pageSize,
+			sortBy,
+			sortDir,
+			search,
+			statusFilter,
+			interestFilter
+		)
 		: { data: [], total: 0, page: 1, pageSize: 10 };  // Fallback
 
     return {

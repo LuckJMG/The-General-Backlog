@@ -1,5 +1,5 @@
 import { sql, query } from '$lib/db';
-import { type EntryRow } from './types/db';
+import { EntryInterest, EntryStatus, type EntryRow } from './types/db';
 import {
 	type Entry,
 	type EntryInput,
@@ -14,7 +14,9 @@ export const getEntries = async (
 	pageSize: number = 10,
 	sortBy: string = 'priority',
 	sortDir: 'asc' | 'desc' = 'desc',
-	search: string = ''
+	search: string = '',
+	statusFilter: EntryStatus | null = null,
+	interestFilter: EntryInterest | null = null
 ): Promise<PaginatedResult<Entry>> => {
 	let offset = (page - 1) * pageSize;
 
@@ -27,6 +29,14 @@ export const getEntries = async (
 	if (search) {
 		whereClause += ' AND title LIKE ?';
 		params.push(`%${search}%`);
+	}
+	if (statusFilter) {
+		whereClause += ' AND status = ?';
+		params.push(statusFilter);
+	}
+	if (interestFilter) {
+		whereClause += ' AND interest = ?';
+		params.push(interestFilter);
 	}
 	
 	params.push(pageSize, offset);
