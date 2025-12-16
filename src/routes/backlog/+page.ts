@@ -16,8 +16,11 @@ export const load: PageLoad = async ({ url }) => {
 	let sortBy = url.searchParams.get('sortBy') || 'priority';
 	let sortDir = (url.searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc';
 
+	// Search
+	let search = (url.searchParams.get('search') || '').trim();
+
     let paginatedResult = activeBacklog
-		? await getEntries(activeBacklog.id, page, pageSize, sortBy, sortDir)
+		? await getEntries(activeBacklog.id, page, pageSize, sortBy, sortDir, search)
 		: { data: [], total: 0, page: 1, pageSize: 10 };  // Fallback
 
     return {

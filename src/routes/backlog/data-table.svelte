@@ -14,6 +14,9 @@ import {
 } from "$lib/components/ui/data-table/index";
 import * as Table from "$lib/components/ui/table/index";
 import * as Pagination from "$lib/components/ui/pagination";
+import * as InputGroup from "$lib/components/ui/input-group";
+import SearchIcon from "@lucide/svelte/icons/search";
+import X from '@lucide/svelte/icons/x';
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -28,7 +31,6 @@ let { data, columns, totalCount, pageIndex, pageSize, onRowClick }: DataTablePro
 
 let sortBy = $derived(page.url.searchParams.get('sortBy') || 'priority');
 let sortDir = $derived(page.url.searchParams.get('sortOrder') || 'desc');
-
 let sorting = $derived<SortingState>([
 	{
 		id: sortBy,
@@ -51,6 +53,20 @@ const setSorting: OnChangeFn<SortingState> = (updater) => {
 
 	goto(`?${params.toString()}`, { keepFocus: true });
 };
+
+
+let searchInput = $state<HTMLInputElement | null>(null);
+let search = $state<string>(page.url.searchParams.get('search') || '');
+let timer: ReturnType<typeof setTimeout>;
+
+const onSearch = () => {
+	let params = new URLSearchParams(page.url.searchParams);
+
+	search === '' ? params.delete('search') : params.set('search', search);
+	pageIndex = 1;
+
+	goto(`?${params.toString()}`, { keepFocus: true, replaceState: true });
+}
 
 const table = createSvelteTable({
 	get data() { return data; },
@@ -86,6 +102,39 @@ const handlePageChange = (newPage: number) => {
 </script>
 
 <div class="space-y-4">
+	<div class="flex justify-berween items-start mb-4">
+		<InputGroup.Root class='max-w-xs w-full'>
+			<InputGroup.Input
+				bind:ref={searchInput}
+				placeholder="Search..."
+				bind:value={search}
+				oninput={() => {
+					clearTimeout(timer);
+					timer = setTimeout(onSearch, 300);
+				}}
+				class="pl-2"
+			/>
+			<InputGroup.Addon>
+				<SearchIcon class='size-4 text-muted-foreground'/>
+			</InputGroup.Addon>
+			{#if search !== ''}
+				<InputGroup.Addon align='inline-end'>
+					<button
+						onclick={() => {
+							search = '';
+							onSearch();
+							searchInput?.focus();
+						}}
+						class="text-muted-foreground hover:text-foreground transition-colors p-1"
+						aria-label="Clear search"
+					>
+						<X class="hover:cursor-pointer size-4" />
+					</button>
+				</InputGroup.Addon>
+			{/if}
+		</InputGroup.Root>
+	</div>
+
 	<div class="rounded-md border">
 		<Table.Root>
 			<Table.Header>

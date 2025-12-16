@@ -1,5 +1,5 @@
 import { sql, query } from '$lib/db';
-import { type EntryRow, EntryStatus } from './types/db';
+import { type EntryRow } from './types/db';
 import {
 	type Entry,
 	type EntryInput,
@@ -13,12 +13,23 @@ export const getEntries = async (
 	page: number = 1,
 	pageSize: number = 10,
 	sortBy: string = 'priority',
-	sortDir: 'asc' | 'desc' = 'desc'
+	sortDir: 'asc' | 'desc' = 'desc',
+	search: string = ''
 ): Promise<PaginatedResult<Entry>> => {
 	let offset = (page - 1) * pageSize;
 
 	let dbColumn = SORT_MAPPING[sortBy] || 'normalized_priority';
 	let dbDirection = sortDir === 'asc' ? 'ASC' : 'DESC';
+
+	let whereClause = 'backlog_id = ?';
+	let params: any[] = [backlogId];
+
+	if (search) {
+		whereClause += ' AND title LIKE ?';
+		params.push(`%${search}%`);
+	}
+	
+	params.push(pageSize, offset);
 
     let rows = await query(sql`
         WITH raw_data AS (
@@ -31,7 +42,7 @@ export const getEntries = async (
                     ELSE 1.0
                 END as priority
             FROM entries
-            WHERE backlog_id = ?
+            WHERE ${whereClause}
         ),
         stats AS (
             -- Get priority limits
@@ -50,7 +61,7 @@ export const getEntries = async (
         FROM raw_data r, stats s
         ORDER BY ${dbColumn} ${dbDirection}
 		LIMIT ? OFFSET ?
-    `, [backlogId, pageSize, offset]) as (EntryRow & { normalized_priority: number, total_count: number })[];
+    `, params) as (EntryRow & { normalized_priority: number, total_count: number })[];
 
     let entries = rows.map(row => mapEntry(row, row.normalized_priority));
 	let total = rows.length > 0 ? rows[0].total_count : 0;
@@ -147,22 +158,6 @@ export const updateEntry = async (
     values.push(id);
 
     await query(`UPDATE entries SET ${updates.join(', ')} WHERE id = ?`, values);
-};
-
-export const updateEntryStatus = async (id: number, newStatus: EntryStatus): Promise<void> => {
-    let update = "";
-
-    if (newStatus === EntryStatus.Started) {
-        update = ", started_at = COALESCE(started_at, unixepoch())";
-    } else if (newStatus === EntryStatus.Finished) {
-        update = ", finished_at = unixepoch()";
-    }
-
-    await query(`
-        UPDATE entries 
-        SET status = ? ${update}
-        WHERE id = ?
-    `, [newStatus, id]);
 };
 
 export const deleteEntry = async (id: number): Promise<void> => {
