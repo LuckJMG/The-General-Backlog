@@ -1,4 +1,5 @@
-import { sql, query } from '$lib/db';
+import sql from './sql';
+import { query } from '$lib/backend/db';
 import { EntryInterest, EntryStatus, type EntryRow } from './types/db';
 import {
 	type Entry,

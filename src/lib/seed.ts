@@ -1,6 +1,5 @@
-import { query } from '$lib/db';
-
-const sql = (strings: TemplateStringsArray, ...values: any[]) => String.raw({ raw: strings }, ...values);
+import sql from './sql';
+import { query } from '$lib/backend/db';
 
 const GAMES = [
     { title: "Hollow Knight: Silksong", score: 0, duration: 30, interest: "high", status: "pending" },

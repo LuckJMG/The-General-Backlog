@@ -6,15 +6,12 @@ interface WorkerMessage {
 
 let worker: Worker | null = null;
 let messageId = 0;
-const pendingMessages = new Map<number, WorkerMessage>();
+let pendingMessages = new Map<number, WorkerMessage>();
 
-export const sql = (strings: TemplateStringsArray, ...values: any[]) => 
-    String.raw({ raw: strings }, ...values);
-
-export const initDB = async () => {
+export async function initDB() {
     if (worker) return;
 
-    const WorkerClass = (await import('$lib/sqlite.worker?worker')).default;
+    const WorkerClass = (await import('$lib/backend/sqlite.worker?worker')).default;
     worker = new WorkerClass();
 
     worker.onmessage = (event) => {
@@ -25,7 +22,7 @@ export const initDB = async () => {
             return;
         }
 
-        const pending = pendingMessages.get(id);
+        let pending = pendingMessages.get(id);
         if (pending) {
             if (error) pending.reject(error);
             else pending.resolve(result);
@@ -35,12 +32,12 @@ export const initDB = async () => {
 
     worker.postMessage({ type: 'INIT' });
 
-    await new Promise(r => setTimeout(r, 500)); 
+    await new Promise(res => setTimeout(res, 500)); 
 };
 
-export const query = async (sql: string, bind: any[] = []) => {
+export async function query(sql: string, bind: any[] = []) {
     if (!worker) await initDB();
-    
+
     return new Promise((resolve, reject) => {
         const id = messageId++;
         pendingMessages.set(id, { id, resolve, reject });

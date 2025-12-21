@@ -1,5 +1,6 @@
+import sql from './sql';
 import { type Backlog } from '$lib/types/db';
-import { sql, query } from '$lib/db';
+import { query } from '$lib/backend/db';
 
 export const getBacklogs = async (): Promise<Backlog[]> => {
     return await query(sql`
