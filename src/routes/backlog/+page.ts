@@ -1,7 +1,7 @@
 import { getEntries } from '$lib/entry';
 import { getBacklogs } from '$lib/backlog';
-import type { PageLoad } from './$types';
 import type { EntryInterest, EntryStatus } from '$lib/types/db';
+import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ url }) => {
 	// Backlog

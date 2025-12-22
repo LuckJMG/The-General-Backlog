@@ -1,7 +1,7 @@
 <script lang="ts">
     import DataTable from "./data-table.svelte";
     import { columns } from "./columns";
-    import { seedDatabase } from "$lib/seed";
+	import seedDB from '$lib/tests/seed';
     import { Button } from "$lib/components/ui/button";
     import { invalidateAll } from "$app/navigation";
     import BacklogSwitcher from "./components/backlog-switcher.svelte";
@@ -49,7 +49,7 @@
                 variant="destructive" 
                 onclick={async () => {
                     if(confirm('Delete DB and generate test data?')) {
-                        await seedDatabase();
+                        await seedDB();
                         await invalidateAll();
                     }
                 }}

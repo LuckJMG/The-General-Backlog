@@ -1,5 +1,5 @@
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import sql from '$lib/sql';
+import { sql } from './index';
 
 const INIT_QUERY = sql`
 	PRAGMA foreign_keys = ON;

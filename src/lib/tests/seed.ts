@@ -1,5 +1,4 @@
-import sql from './sql';
-import { query } from '$lib/backend/db';
+import { sql, query } from '$lib/database';
 
 const GAMES = [
     { title: "Hollow Knight: Silksong", score: 0, duration: 30, interest: "high", status: "pending" },
@@ -19,11 +18,7 @@ const MOVIES = [
     { title: "Interstellar", score: 10, duration: 169, interest: "high", status: "pending" }
 ];
 
-const randomDate = (start: Date, end: Date) => {
-    return Math.floor((start.getTime() + Math.random() * (end.getTime() - start.getTime())) / 1000);
-};
-
-export const seedDatabase = async () => {
+export default async function seedDB() {
     console.log("Generating seeding of data...");
 
     // 1. Clean
@@ -37,22 +32,22 @@ export const seedDatabase = async () => {
     await query(sql`INSERT INTO backlogs (id, name) VALUES (3, 'Books to Read')`);
 
     // 3. Insert game entries
-    for (const game of GAMES) {
+    for (let game of GAMES) {
         await insertMockEntry(1, game);
     }
 
     // 4. Insert movie entries
-    for (const movie of MOVIES) {
+    for (let movie of MOVIES) {
         await insertMockEntry(2, movie);
     }
 
     // 5. Generate bulk data
+	const STATUS_POOL = ['pending', 'started', 'finished', 'dropped'];
+	const INTEREST_POOL = ['low', 'neutral', 'high'];
     for (let i = 1; i <= 20; i++) {
-        const statusPool = ['pending', 'started', 'finished', 'dropped'];
-        const randomStatus = statusPool[Math.floor(Math.random() * statusPool.length)];
+        const randomStatus = STATUS_POOL[Math.floor(Math.random() * STATUS_POOL.length)];
 
-        const interestPool = ['low', 'neutral', 'high'];
-        const randomInterest = interestPool[Math.floor(Math.random() * interestPool.length)];
+        const randomInterest = INTEREST_POOL[Math.floor(Math.random() * INTEREST_POOL.length)];
 
         await insertMockEntry(1, {
             title: `Generic Indie #${i}`,
@@ -111,3 +106,16 @@ async function insertMockEntry(backlogId: number, data: any) {
         ranking
     ]);
 }
+
+
+function randomDate(start: Date, end: Date) {
+	const MS_TO_S = 1 / 1000;
+
+	let timeSpan = end.getTime() - start.getTime();
+	let timeOffset = Math.random() * timeSpan;
+	let timeMS = start.getTime() + timeOffset;
+	let timeS = timeMS * MS_TO_S;
+	let date = Math.floor(timeS);
+
+    return date;
+};

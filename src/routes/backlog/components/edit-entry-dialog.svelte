@@ -11,7 +11,7 @@
 
 	import { updateEntry, deleteEntry } from "$lib/entry";
 	import { invalidateAll } from "$app/navigation";
-	import { EntryInterest, EntryStatus } from "$lib/types/db";
+	import { EntryInterest, EntryStatus } from "$lib/database/types";
 	import type { Entry } from "$lib/types/domain";
 
 	let { entry, open = $bindable(false) } = $props<{ 

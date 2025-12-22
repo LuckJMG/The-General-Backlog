@@ -14,7 +14,7 @@ import ChevronUp from "@lucide/svelte/icons/chevron-up";
 import { createEntry } from "$lib/entry";
 import { invalidateAll } from "$app/navigation";
 import { page } from "$app/state";
-import { EntryInterest, EntryStatus } from "$lib/types/db";
+import { EntryInterest, EntryStatus } from "$lib/database/types";
 import type { EntryInput } from "$lib/types/domain";
 
 let open = $state(false);

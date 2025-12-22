@@ -18,7 +18,7 @@ import * as InputGroup from "$lib/components/ui/input-group";
 import * as Select from '$lib/components/ui/select';
 import SearchIcon from "@lucide/svelte/icons/search";
 import X from '@lucide/svelte/icons/x';
-import { EntryStatus, EntryInterest } from '$lib/types/db';
+import { EntryStatus, EntryInterest } from '$lib/database/types';
 import StatusCell from './status-cell.svelte';
 import InterestCell from './interest-cell.svelte';
 

@@ -1,4 +1,4 @@
-import { type EntryRow } from '$lib/types/db';
+import { type EntryRow } from '$lib/database/types';
 import type { Entry } from '$lib/types/domain';
 
 export const mapEntry = (row: EntryRow, preCalculatedPriority?: number): Entry => {

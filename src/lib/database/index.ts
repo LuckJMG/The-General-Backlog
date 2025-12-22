@@ -8,10 +8,24 @@ let worker: Worker | null = null;
 let messageId = 0;
 let pendingMessages = new Map<number, WorkerMessage>();
 
-export async function initDB() {
+export function sql(strings: TemplateStringsArray, ...values: any[]) {
+    return String.raw({ raw: strings }, ...values);
+}
+
+export async function query(sql: string, bind: any[] = []) {
+    if (!worker) await initDB();
+
+    return new Promise((resolve, reject) => {
+        const id = messageId++;
+        pendingMessages.set(id, { id, resolve, reject });
+        worker!.postMessage({ type: 'EXEC', id, sql, bind });
+    });
+};
+
+async function initDB() {
     if (worker) return;
 
-    const WorkerClass = (await import('$lib/backend/sqlite.worker?worker')).default;
+    const WorkerClass = (await import('$lib/database/sqlite.worker?worker')).default;
     worker = new WorkerClass();
 
     worker.onmessage = (event) => {
@@ -35,12 +49,3 @@ export async function initDB() {
     await new Promise(res => setTimeout(res, 500)); 
 };
 
-export async function query(sql: string, bind: any[] = []) {
-    if (!worker) await initDB();
-
-    return new Promise((resolve, reject) => {
-        const id = messageId++;
-        pendingMessages.set(id, { id, resolve, reject });
-        worker!.postMessage({ type: 'EXEC', id, sql, bind });
-    });
-};
