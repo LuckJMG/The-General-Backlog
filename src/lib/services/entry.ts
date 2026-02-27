@@ -5,8 +5,8 @@ import {
 	type EntryInput,
 	type PaginatedResult,
 	SORT_MAPPING
-} from './types/domain';
-import { mapEntry } from './utils/mappers';
+} from '$lib/types/domain';
+import { mapEntry } from '$lib/utils/mappers';
 
 export const getEntries = async (
 	backlogId: number,
