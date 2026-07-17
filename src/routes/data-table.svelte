@@ -73,7 +73,7 @@ const table = createSvelteTable({
 								size="icon-sm"
 								type="button"
 								aria-label="Edit entry"
-								onclick={() => (editing = row.original as DbEntry)}
+								onclick={() => (editing = { ...(row.original as DbEntry) })}
 								class="bg-background border"
 							>
 								<PencilIcon />
