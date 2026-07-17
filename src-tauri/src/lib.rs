@@ -9,6 +9,7 @@ pub fn run() {
             db::init_db,
             db::list_entries,
             db::add_entry,
+            db::update_entry,
             db::delete_entry
         ])
         .run(tauri::generate_context!())

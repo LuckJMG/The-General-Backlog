@@ -90,6 +90,28 @@ pub fn add_entry(
 }
 
 #[tauri::command]
+pub fn update_entry(
+    db: State<'_, Db>,
+    id: i64,
+    title: String,
+    score: f64,
+    duration: i64,
+) -> Result<Entry, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    conn.execute(
+        "UPDATE entries SET title = ?2, score = ?3, duration = ?4 WHERE id = ?1",
+        params![id, title, score, duration],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(Entry {
+        id,
+        title,
+        score,
+        duration,
+    })
+}
+
+#[tauri::command]
 pub fn delete_entry(db: State<'_, Db>, id: i64) -> Result<(), String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     conn.execute("DELETE FROM entries WHERE id = ?1", params![id])

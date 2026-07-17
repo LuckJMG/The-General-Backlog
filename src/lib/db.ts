@@ -23,6 +23,15 @@ export async function addEntry(
 	return invoke<DbEntry>("add_entry", { title, score, duration });
 }
 
+export async function updateEntry(
+	id: number,
+	title: string,
+	score: number,
+	duration: number,
+): Promise<DbEntry> {
+	return invoke<DbEntry>("update_entry", { id, title, score, duration });
+}
+
 export async function deleteEntry(id: number): Promise<void> {
 	await invoke("delete_entry", { id });
 }

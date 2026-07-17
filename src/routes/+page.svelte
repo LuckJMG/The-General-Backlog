@@ -25,5 +25,10 @@ async function handleDelete(id: number) {
 	<div class="mb-4 flex justify-start">
 		<AddEntryDialog onAdded={(e) => (entries = [...entries, e])} />
 	</div>
-	<DataTable data={result.rows} {columns} onDelete={handleDelete} />
+	<DataTable
+		data={result.rows}
+		{columns}
+		onDelete={handleDelete}
+		onEdit={(updated) => (entries = entries.map((e) => (e.id === updated.id ? updated : e)))}
+	/>
 </div>
