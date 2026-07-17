@@ -55,7 +55,7 @@ const table = createSvelteTable({
 		</Table.Header>
 		<Table.Body>
 			{#each table.getRowModel().rows as row (row.id)}
-				<Table.Row data-state={row.getIsSelected() && "selected"} class="group relative">
+				<Table.Row class="group relative">
 					{#each row.getVisibleCells() as cell (cell.id)}
 						<Table.Cell>
 							<FlexRender

@@ -16,10 +16,7 @@ let { entry, onUpdated, onClose }: Props = $props();
 	submitLabel="Save"
 	submittingLabel="Saving..."
 	dialogTitle="Edit Entry"
-	onSubmit={(t, s, d) => {
-		if (!entry) return Promise.reject(new Error("No entry to update"));
-		return updateEntry(entry.id, t, s, d);
-	}}
+	onSubmit={(t, s, d) => updateEntry(entry!.id, t, s, d)}
 	onSubmitted={onUpdated}
 	{onClose}
 />

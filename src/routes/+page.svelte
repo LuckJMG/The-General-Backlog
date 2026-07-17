@@ -3,12 +3,11 @@ import { onMount } from "svelte";
 import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
 import { type DbEntry, deleteEntry, initDb, listEntries } from "$lib/db";
 import { prioritize } from "$lib/priority";
-import { makeColumns } from "./columns.js";
+import { columns } from "./columns.js";
 import DataTable from "./data-table.svelte";
 
 let entries = $state<DbEntry[]>([]);
 let result = $derived(prioritize(entries));
-let columns = $derived(makeColumns(result.min, result.max));
 
 onMount(async () => {
 	await initDb();
