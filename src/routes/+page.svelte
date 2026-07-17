@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
-import { type DbEntry, initDb, listEntries } from "$lib/db";
+import { type DbEntry, deleteEntry, initDb, listEntries } from "$lib/db";
 import { prioritize } from "$lib/priority";
 import { makeColumns } from "./columns.js";
 import DataTable from "./data-table.svelte";
@@ -14,11 +14,16 @@ onMount(async () => {
 	await initDb();
 	entries = await listEntries();
 });
+
+async function handleDelete(id: number) {
+	await deleteEntry(id);
+	entries = entries.filter((e) => e.id !== id);
+}
 </script>
 
 <div class="m-16">
 	<div class="mb-4 flex justify-start">
 		<AddEntryDialog onAdded={(e) => (entries = [...entries, e])} />
 	</div>
-	<DataTable data={result.rows} {columns} />
+	<DataTable data={result.rows} {columns} onDelete={handleDelete} />
 </div>

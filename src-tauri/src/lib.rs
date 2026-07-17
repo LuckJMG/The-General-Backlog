@@ -8,7 +8,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             db::init_db,
             db::list_entries,
-            db::add_entry
+            db::add_entry,
+            db::delete_entry
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
