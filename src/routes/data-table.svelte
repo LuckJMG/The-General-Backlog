@@ -2,7 +2,7 @@
 import PencilIcon from "@lucide/svelte/icons/pencil";
 import Trash2Icon from "@lucide/svelte/icons/trash-2";
 import { type ColumnDef, getCoreRowModel } from "@tanstack/table-core";
-import EditEntryDialog from "$lib/components/edit-entry-dialog.svelte";
+import EntryDialog from "$lib/components/entry-dialog.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import { ButtonGroup } from "$lib/components/ui/button-group/index.js";
 import {
@@ -10,7 +10,7 @@ import {
 	FlexRender,
 } from "$lib/components/ui/data-table/index.js";
 import * as Table from "$lib/components/ui/table/index.js";
-import type { DbEntry } from "$lib/db";
+import { type DbEntry, updateEntry } from "$lib/db";
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -102,4 +102,15 @@ const table = createSvelteTable({
 	</Table.Root>
 </div>
 
-<EditEntryDialog entry={editing} onUpdated={onEdit} onClose={() => (editing = null)} />
+<EntryDialog
+	entry={editing}
+	submitLabel="Save"
+	submittingLabel="Saving..."
+	dialogTitle="Edit Entry"
+	onSubmit={(t, s, d) => updateEntry(editing!.id, t, s, d)}
+	onSubmitted={(u) => {
+		onEdit(u);
+		editing = null;
+	}}
+	onClose={() => (editing = null)}
+/>

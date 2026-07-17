@@ -1,12 +1,9 @@
 <script lang="ts">
-import type { Snippet } from "svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import * as Dialog from "$lib/components/ui/dialog/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
 import { Label } from "$lib/components/ui/label/index.js";
 import type { DbEntry } from "$lib/db";
-
-type TriggerChildProps = { props: Record<string, unknown> };
 
 type Props = {
 	entry: DbEntry | null;
@@ -18,7 +15,7 @@ type Props = {
 	submitLabel: string;
 	submittingLabel: string;
 	dialogTitle: string;
-	trigger?: Snippet<[TriggerChildProps]>;
+	open?: boolean;
 	onSubmitted?: (entry: DbEntry) => void;
 	onClose?: () => void;
 };
@@ -29,18 +26,15 @@ let {
 	submitLabel,
 	submittingLabel,
 	dialogTitle,
-	trigger,
+	open = $bindable(false),
 	onSubmitted,
 	onClose,
 }: Props = $props();
 
-let open = $state(false);
 let title = $state("");
 let score = $state("");
 let duration = $state("");
 let submitting = $state(false);
-
-const isEdit = $derived(entry !== null);
 
 $effect(() => {
 	if (entry) {
@@ -73,14 +67,10 @@ async function submit() {
 			Number(duration),
 		);
 		onSubmitted?.(result);
-		if (isEdit) {
-			onClose?.();
-		} else {
-			title = "";
-			score = "";
-			duration = "";
-			open = false;
-		}
+		title = "";
+		score = "";
+		duration = "";
+		open = false;
 	} finally {
 		submitting = false;
 	}
@@ -88,18 +78,11 @@ async function submit() {
 
 function handleOpenChange(next: boolean) {
 	open = next;
-	if (!next && isEdit) onClose?.();
+	if (!next) onClose?.();
 }
 </script>
 
 <Dialog.Root bind:open onOpenChange={handleOpenChange}>
-	{#if trigger}
-		<Dialog.Trigger>
-			{#snippet child({ props })}
-				{@render trigger({ props })}
-			{/snippet}
-		</Dialog.Trigger>
-	{/if}
 	<Dialog.Content>
 		<Dialog.Header>
 			<Dialog.Title>{dialogTitle}</Dialog.Title>
