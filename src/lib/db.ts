@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 export type DbEntry = {
 	id: number;
-	name: string;
+	title: string;
 	score: number;
 	duration: number;
 };
@@ -16,9 +16,9 @@ export async function listEntries(): Promise<DbEntry[]> {
 }
 
 export async function addEntry(
-	name: string,
+	title: string,
 	score: number,
 	duration: number,
 ): Promise<DbEntry> {
-	return invoke<DbEntry>("add_entry", { name, score, duration });
+	return invoke<DbEntry>("add_entry", { title, score, duration });
 }

@@ -4,7 +4,7 @@ import type { Entry } from "$lib/priority";
 export function makeColumns(min: number, max: number): ColumnDef<Entry>[] {
 	const span = max - min;
 	return [
-		{ accessorKey: "name", header: "Name" },
+		{ accessorKey: "title", header: "Title" },
 		{ accessorKey: "score", header: "Score" },
 		{ accessorKey: "duration", header: "Duration" },
 		{

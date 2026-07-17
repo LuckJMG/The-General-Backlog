@@ -8,7 +8,7 @@ import DataTable from "./data-table.svelte";
 
 let entries = $state<DbEntry[]>([]);
 let result = $derived(prioritize(entries));
-let cols = $derived(makeColumns(result.min, result.max));
+let columns = $derived(makeColumns(result.min, result.max));
 
 onMount(async () => {
 	await initDb();
@@ -20,5 +20,5 @@ onMount(async () => {
 	<div class="mb-4 flex justify-start">
 		<AddEntryDialog onAdded={(e) => (entries = [...entries, e])} />
 	</div>
-	<DataTable data={result.rows} columns={cols} />
+	<DataTable data={result.rows} {columns} />
 </div>

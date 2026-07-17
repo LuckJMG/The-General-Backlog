@@ -13,7 +13,7 @@ type Props = {
 let { onAdded }: Props = $props();
 
 let open = $state(false);
-let name = $state("");
+let title = $state("");
 let score = $state("");
 let duration = $state("");
 let submitting = $state(false);
@@ -22,7 +22,7 @@ const canSubmit = $derived.by(() => {
 	const s = Number(score);
 	const d = Number(duration);
 	return (
-		name.trim() !== "" &&
+		title.trim() !== "" &&
 		Number.isFinite(s) &&
 		s > 0 &&
 		Number.isFinite(d) &&
@@ -35,14 +35,14 @@ async function submit() {
 	submitting = true;
 	try {
 		const created = await addEntry(
-			name.trim(),
+			title.trim(),
 			Number(score),
 			Number(duration),
 		);
 		onAdded(created);
 
 		// Reset form
-		name = "";
+		title = "";
 		score = "";
 		duration = "";
 
@@ -74,10 +74,10 @@ async function submit() {
 			class="flex flex-col gap-4"
 		>
 			<div class="flex flex-col gap-2">
-				<Label for="entry-name">Name</Label>
+				<Label for="entry-title">Title</Label>
 				<Input
-					id="entry-name"
-					bind:value={name}
+					id="entry-title"
+					bind:value={title}
 					placeholder="The Pragmatic Programmer"
 					autocomplete="off"
 				/>

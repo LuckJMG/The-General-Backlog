@@ -8,14 +8,14 @@ pub struct Db(pub Mutex<Connection>);
 #[derive(Serialize)]
 pub struct Entry {
     pub id: i64,
-    pub name: String,
+    pub title: String,
     pub score: f64,
     pub duration: i64,
 }
 
 const SCHEMA: &str = "CREATE TABLE IF NOT EXISTS entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    title TEXT NOT NULL,
     score REAL NOT NULL,
     duration INTEGER NOT NULL
 )";
@@ -36,10 +36,10 @@ pub fn init_db(db: State<'_, Db>) -> Result<(), String> {
         .query_row("SELECT COUNT(*) FROM entries", [], |r| r.get(0))
         .map_err(|e| e.to_string())?;
     if count == 0 {
-        for (name, score, duration) in SEED {
+        for (title, score, duration) in SEED {
             conn.execute(
-                "INSERT INTO entries (name, score, duration) VALUES (?1, ?2, ?3)",
-                params![*name, *score, *duration],
+                "INSERT INTO entries (title, score, duration) VALUES (?1, ?2, ?3)",
+                params![*title, *score, *duration],
             )
             .map_err(|e| e.to_string())?;
         }
@@ -51,13 +51,13 @@ pub fn init_db(db: State<'_, Db>) -> Result<(), String> {
 pub fn list_entries(db: State<'_, Db>) -> Result<Vec<Entry>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, name, score, duration FROM entries")
+        .prepare("SELECT id, title, score, duration FROM entries")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
             Ok(Entry {
                 id: r.get(0)?,
-                name: r.get(1)?,
+                title: r.get(1)?,
                 score: r.get(2)?,
                 duration: r.get(3)?,
             })
@@ -70,20 +70,20 @@ pub fn list_entries(db: State<'_, Db>) -> Result<Vec<Entry>, String> {
 #[tauri::command]
 pub fn add_entry(
     db: State<'_, Db>,
-    name: String,
+    title: String,
     score: f64,
     duration: i64,
 ) -> Result<Entry, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     conn.execute(
-        "INSERT INTO entries (name, score, duration) VALUES (?1, ?2, ?3)",
-        params![name, score, duration],
+        "INSERT INTO entries (title, score, duration) VALUES (?1, ?2, ?3)",
+        params![title, score, duration],
     )
     .map_err(|e| e.to_string())?;
     let id = conn.last_insert_rowid();
     Ok(Entry {
         id,
-        name,
+        title,
         score,
         duration,
     })
