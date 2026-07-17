@@ -4,21 +4,22 @@ import { Button } from "$lib/components/ui/button/index.js";
 import * as Dialog from "$lib/components/ui/dialog/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
 import { Label } from "$lib/components/ui/label/index.js";
+import type { DbEntry } from "$lib/db";
 
 type TriggerChildProps = { props: Record<string, unknown> };
 
 type Props = {
-	entry: import("$lib/db").DbEntry | null;
+	entry: DbEntry | null;
 	onSubmit: (
 		title: string,
 		score: number,
 		duration: number,
-	) => Promise<import("$lib/db").DbEntry>;
+	) => Promise<DbEntry>;
 	submitLabel: string;
 	submittingLabel: string;
 	dialogTitle: string;
 	trigger?: Snippet<[TriggerChildProps]>;
-	onSubmitted?: (entry: import("$lib/db").DbEntry) => void;
+	onSubmitted?: (entry: DbEntry) => void;
 	onClose?: () => void;
 };
 

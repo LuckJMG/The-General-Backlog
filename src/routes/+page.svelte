@@ -6,7 +6,7 @@ import { prioritize } from "$lib/priority";
 import { columns } from "./columns.js";
 import DataTable from "./data-table.svelte";
 
-let entries = $state<DbEntry[]>([]);
+let entries = $state.raw<DbEntry[]>([]);
 let result = $derived(prioritize(entries));
 
 onMount(async () => {

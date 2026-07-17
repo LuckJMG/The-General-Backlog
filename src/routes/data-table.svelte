@@ -1,4 +1,4 @@
-<script lang="ts" generics="TData, TValue">
+<script lang="ts" generics="TData extends DbEntry, TValue">
 import PencilIcon from "@lucide/svelte/icons/pencil";
 import Trash2Icon from "@lucide/svelte/icons/trash-2";
 import { type ColumnDef, getCoreRowModel } from "@tanstack/table-core";
@@ -73,7 +73,7 @@ const table = createSvelteTable({
 								size="icon-sm"
 								type="button"
 								aria-label="Edit entry"
-								onclick={() => (editing = { ...(row.original as DbEntry) })}
+								onclick={() => (editing = { ...row.original })}
 								class="bg-background border"
 							>
 								<PencilIcon />
@@ -83,7 +83,7 @@ const table = createSvelteTable({
 								size="icon-sm"
 								type="button"
 								aria-label="Delete entry"
-								onclick={() => onDelete((row.original as { id: number }).id)}
+								onclick={() => onDelete(row.original.id)}
 								class="bg-background text-destructive hover:bg-red-100 hover:text-destructive border"
 							>
 								<Trash2Icon />
