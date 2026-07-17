@@ -7,20 +7,19 @@ Tauri 2 desktop app. Tracks backlog entries with a priority score derived from r
 - CRUD via five Tauri commands: `init_db`, `list_entries`, `add_entry`, `update_entry`, `delete_entry`.
 - Priority formula: `score / duration`, sorted descending; the `Priority` column displays min-max normalized to 0-100 for visual ranking.
 - On first launch, `init_db` seeds 5 sample rows if the table is empty.
-- Hover-revealed edit/delete buttons per row; both flows share one `EntryDialog` form (title, score, duration) with non-empty title + positive score/duration validation.
+- Hover-revealed edit/delete buttons per row. Add (from `+page.svelte`) and edit (from `data-table.svelte`) both use the same `EntryDialog` form (title, score, duration) with non-empty title + positive score/duration validation; the parent owns the `open` state via `bind:open`.
 - DB file lives at `<app_data_dir>/backlog.db` per platform (managed by `tauri::Manager` in `src-tauri/src/db.rs:122`).
 
 ## Stack
 - Frontend: SvelteKit 2 (Svelte 5 runes) + TS strict, shadcn-svelte (vega / lucide / neutral) on Tailwind v4 + `tw-animate-css`. Data table: `@tanstack/table-core` via the local shadcn wrapper at `src/lib/components/ui/data-table/`.
-- Backend: Tauri 2 (Rust) with `rusqlite` (bundled, no `tauri-plugin-sql`). `tauri-plugin-opener` is registered but unused in the MVP.
+- Backend: Tauri 2 (Rust) with `rusqlite` (bundled, no `tauri-plugin-sql`).
 - Package manager: bun. Task runner: just. Formatter/linter: Biome. Rust: default rustfmt.
 
 ## Layout
 - `src/` — SvelteKit app. Entry: `src/routes/+page.svelte`, layout at `src/routes/+layout.ts`. All shared code under `src/lib/`; shadcn primitives in `src/lib/components/ui/`.
 - `src/lib/db.ts` — `DbEntry` type + 5 thin `invoke()` wrappers, one per Tauri command.
 - `src/lib/priority.ts` — pure `prioritize(entries) → { rows, min, max }` (no I/O).
-- `src/lib/components/entry-dialog.svelte` — shared add/edit form; consumed by the two dialog wrappers below.
-- `src/lib/components/add-entry-dialog.svelte`, `edit-entry-dialog.svelte` — thin wrappers around `EntryDialog` (trigger button + submit/cancel wiring).
+- `src/lib/components/entry-dialog.svelte` — shared add/edit form (title, score, duration); instantiated directly by `+page.svelte` (add) and `data-table.svelte` (edit), each binding its own `open` state.
 - `src/routes/+page.svelte` — loads entries on mount, owns the `entries` state, derives `result` and `columns` reactively.
 - `src/routes/data-table.svelte` — TanStack table with hover-revealed action buttons; calls back into the page on delete/edit.
 - `src/routes/columns.ts` — column defs; `Priority` cell is a 0-100 normalized render of the raw ratio.
@@ -57,7 +56,6 @@ No unit/e2e tests or CI exist yet; do not add them unless asked.
 - `.svelte-kit/`, `build/`, `src-tauri/target/`, and `src-tauri/gen/schemas` are generated — never edit by hand.
 - `tauri.conf.json` `frontendDist` is `../build` (relative to `src-tauri/`); `bun run build` must run before `tauri build`.
 - `opencode.json` enables the Svelte plugin (MCP) and formatter. No repo-local agent rules file exists beyond this.
-- `tauri-plugin-opener` is loaded in `lib.rs` and `opener:default` is granted in `capabilities/default.json`, but no UI calls it yet. Remove if it stays unused.
 - The seed block in `init_db` only runs when `SELECT COUNT(*) FROM entries` is 0 — wiping the DB file is the only way to re-seed.
 
 ## Git workflow
