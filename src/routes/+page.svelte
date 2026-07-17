@@ -1,7 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
 import { type DbEntry, initDb, listEntries } from "$lib/db";
-import { prioritize } from "$lib/priority.js";
+import { prioritize } from "$lib/priority";
 import { makeColumns } from "./columns.js";
 import DataTable from "./data-table.svelte";
 
@@ -16,5 +17,8 @@ onMount(async () => {
 </script>
 
 <div class="m-16">
+	<div class="mb-4 flex justify-start">
+		<AddEntryDialog onAdded={(e) => (entries = [...entries, e])} />
+	</div>
 	<DataTable data={result.rows} columns={cols} />
 </div>

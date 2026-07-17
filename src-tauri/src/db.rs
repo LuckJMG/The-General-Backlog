@@ -67,6 +67,28 @@ pub fn list_entries(db: State<'_, Db>) -> Result<Vec<Entry>, String> {
         .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+pub fn add_entry(
+    db: State<'_, Db>,
+    name: String,
+    score: f64,
+    duration: i64,
+) -> Result<Entry, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    conn.execute(
+        "INSERT INTO entries (name, score, duration) VALUES (?1, ?2, ?3)",
+        params![name, score, duration],
+    )
+    .map_err(|e| e.to_string())?;
+    let id = conn.last_insert_rowid();
+    Ok(Entry {
+        id,
+        name,
+        score,
+        duration,
+    })
+}
+
 pub fn open(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let dir = app.path().app_data_dir()?;
     std::fs::create_dir_all(&dir)?;

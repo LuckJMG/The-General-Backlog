@@ -14,3 +14,11 @@ export async function initDb() {
 export async function listEntries(): Promise<DbEntry[]> {
 	return invoke<DbEntry[]>("list_entries");
 }
+
+export async function addEntry(
+	name: string,
+	score: number,
+	duration: number,
+): Promise<DbEntry> {
+	return invoke<DbEntry>("add_entry", { name, score, duration });
+}
