@@ -1,7 +1,15 @@
 <script lang="ts" generics="TData extends DbEntry, TValue">
+import ArrowDownIcon from "@lucide/svelte/icons/arrow-down";
+import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
+import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
 import PencilIcon from "@lucide/svelte/icons/pencil";
 import Trash2Icon from "@lucide/svelte/icons/trash-2";
-import { type ColumnDef, getCoreRowModel } from "@tanstack/table-core";
+import {
+	type ColumnDef,
+	getCoreRowModel,
+	getSortedRowModel,
+	type SortingState,
+} from "@tanstack/table-core";
 import EntryDialog from "$lib/components/entry-dialog.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import { ButtonGroup } from "$lib/components/ui/button-group/index.js";
@@ -25,6 +33,8 @@ let { data, columns, onDelete, onEdit }: DataTableProps<TData, TValue> =
 
 let editing = $state<DbEntry | null>(null);
 
+let sorting = $state<SortingState>([{ id: "priority", desc: true }]);
+
 const table = createSvelteTable({
 	get data() {
 		return data;
@@ -33,6 +43,18 @@ const table = createSvelteTable({
 		return columns;
 	},
 	getCoreRowModel: getCoreRowModel(),
+	getSortedRowModel: getSortedRowModel(),
+	state: {
+		get sorting() {
+			return sorting;
+		},
+	},
+	onSortingChange: (updater) => {
+		sorting =
+			typeof updater === "function"
+				? (updater as (old: SortingState) => SortingState)(sorting)
+				: updater;
+	},
 });
 </script>
 
@@ -42,18 +64,36 @@ const table = createSvelteTable({
 			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 				<Table.Row>
 				{#each headerGroup.headers as header (header.id)}
+					{@const sorted = header.column.getIsSorted()}
 					<Table.Head
 						colspan={header.colSpan}
+						aria-sort={sorted === "asc"
+							? "ascending"
+							: sorted === "desc"
+								? "descending"
+								: "none"}
 						class={cn(
-							"font-bold",
 							header.column.columnDef.meta?.headAlign === "center" && "text-center",
 						)}
 					>
 						{#if !header.isPlaceholder}
-							<FlexRender
-								content={header.column.columnDef.header}
-								context={header.getContext()}
-							/>
+							<button
+								type="button"
+								onclick={header.column.getToggleSortingHandler()!}
+								class="inline-flex items-center gap-1 font-bold cursor-pointer select-none hover:text-foreground/80 transition-colors"
+							>
+								<FlexRender
+									content={header.column.columnDef.header}
+									context={header.getContext()}
+								/>
+								{#if sorted === "asc"}
+									<ArrowUpIcon class="size-3.5" />
+								{:else if sorted === "desc"}
+									<ArrowDownIcon class="size-3.5" />
+								{:else}
+									<ChevronsUpDownIcon class="size-3.5 opacity-50" />
+								{/if}
+							</button>
 						{/if}
 					</Table.Head>
 				{/each}
