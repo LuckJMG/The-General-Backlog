@@ -9,6 +9,7 @@ import {
 	deleteEntry,
 	initDb,
 	listEntries,
+	updateEntry,
 } from "$lib/db";
 import { prioritize } from "$lib/priority";
 import { makeColumns } from "./columns.js";
@@ -24,6 +25,7 @@ onMount(async () => {
 });
 
 let addOpen = $state(false);
+let editing = $state<DbEntry | null>(null);
 
 async function handleDelete(id: number) {
 	await deleteEntry(id);
@@ -46,11 +48,20 @@ async function handleDelete(id: number) {
 			onSubmit={addEntry}
 			onSubmitted={(e) => (entries = [...entries, e])}
 		/>
+		<EntryDialog
+			entry={editing}
+			submitLabel="Save"
+			submittingLabel="Saving..."
+			dialogTitle="Edit Entry"
+			onSubmit={(t, s, d) => updateEntry(editing!.id, t, s, d)}
+			onSubmitted={(u) => (entries = entries.map((e) => (e.id === u.id ? u : e)))}
+			onClose={() => (editing = null)}
+		/>
 	</div>
 	<DataTable
 		data={result.rows}
 		{columns}
 		onDelete={handleDelete}
-		onEdit={(updated) => (entries = entries.map((e) => (e.id === updated.id ? updated : e)))}
+		onEditRequest={(e) => (editing = { ...e })}
 	/>
 </div>
