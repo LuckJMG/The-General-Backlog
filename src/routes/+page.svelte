@@ -24,6 +24,7 @@ onMount(async () => {
 });
 
 let addOpen = $state(false);
+let editOpen = $state(false);
 let editing = $state<DbEntry | null>(null);
 
 async function handleDelete(id: number) {
@@ -48,6 +49,7 @@ async function handleDelete(id: number) {
 			onSubmitted={(e) => (entries = [...entries, e])}
 		/>
 		<EntryDialog
+			bind:open={editOpen}
 			entry={editing}
 			submitLabel="Save"
 			submittingLabel="Saving..."
@@ -61,6 +63,9 @@ async function handleDelete(id: number) {
 		data={rows}
 		{columns}
 		onDelete={handleDelete}
-		onEditRequest={(e) => (editing = { ...e })}
+		onEditRequest={(e) => {
+			editing = { ...e };
+			editOpen = true;
+		}}
 	/>
 </div>

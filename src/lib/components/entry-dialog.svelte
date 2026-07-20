@@ -31,25 +31,22 @@ let {
 	onClose,
 }: Props = $props();
 
-let title = $state("");
-let score = $state("");
-let duration = $state("");
+let form = $state({ title: "", score: "", duration: "" });
 let submitting = $state(false);
 
 $effect(() => {
 	if (entry) {
-		title = entry.title;
-		score = String(entry.score);
-		duration = String(entry.duration);
-		open = true;
+		form.title = entry.title;
+		form.score = String(entry.score);
+		form.duration = String(entry.duration);
 	}
 });
 
 const canSubmit = $derived.by(() => {
-	const s = Number(score);
-	const d = Number(duration);
+	const s = Number(form.score);
+	const d = Number(form.duration);
 	return (
-		title.trim() !== "" &&
+		form.title.trim() !== "" &&
 		Number.isFinite(s) &&
 		s > 0 &&
 		Number.isFinite(d) &&
@@ -62,14 +59,12 @@ async function submit() {
 	submitting = true;
 	try {
 		const result = await onSubmit(
-			title.trim(),
-			Number(score),
-			Number(duration),
+			form.title.trim(),
+			Number(form.score),
+			Number(form.duration),
 		);
 		onSubmitted?.(result);
-		title = "";
-		score = "";
-		duration = "";
+		form = { title: "", score: "", duration: "" };
 		open = false;
 	} finally {
 		submitting = false;
@@ -98,7 +93,7 @@ function handleOpenChange(next: boolean) {
 				<Label for="entry-title">Title</Label>
 				<Input
 					id="entry-title"
-					bind:value={title}
+					bind:value={form.title}
 					autocomplete="off"
 				/>
 			</div>
@@ -110,7 +105,7 @@ function handleOpenChange(next: boolean) {
 						type="number"
 						step="0.1"
 						min="0"
-						bind:value={score}
+						bind:value={form.score}
 					/>
 				</div>
 				<div class="flex flex-col gap-2">
@@ -119,7 +114,7 @@ function handleOpenChange(next: boolean) {
 						id="entry-duration"
 						type="number"
 						min="0"
-						bind:value={duration}
+						bind:value={form.duration}
 					/>
 				</div>
 			</div>
