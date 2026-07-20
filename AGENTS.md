@@ -3,11 +3,13 @@
 Tauri 2 desktop app. Tracks backlog entries with a priority score derived from rating and time-to-consume.
 
 ## MVP
-- Single table `entries` with columns: `id` (autoinc), `title` (text), `score` (real), `duration` (integer, hours).
+- Single table `entries` with columns: `id` (autoinc), `title` (text), `score` (real), `duration` (integer, hours), `status` (text, one of `pending`/`active`/`dropped`/`finished`/`completed`, default `pending`).
 - CRUD via five Tauri commands: `init_db`, `list_entries`, `add_entry`, `update_entry`, `delete_entry`.
-- Priority formula: `score / duration`, sorted descending; the `Priority` column displays min-max normalized to 0-100 for visual ranking.
+- Priority formula: `score / duration`, sorted descending; the `Priority` column displays min-max normalized to 0-100 for visual ranking. Entries with status `finished`/`dropped`/`completed` are excluded from the range and render as `-`, pinned to the bottom in both sort directions (`sortUndefined: "last"`).
+- `init_db` migrates pre-status DBs via `ALTER TABLE ... ADD COLUMN status` (guarded by `PRAGMA table_info`).
+- Status column sorts by rank `completed > finished > dropped > active > pending` (desc); asc is the exact reverse. Rendered as a colored `StatusBadge` (pending=yellow, active=blue, dropped=red, finished=green, completed=purple).
 - On first launch, `init_db` seeds 5 sample rows if the table is empty.
-- Hover-revealed edit/delete buttons per row. Add (from `+page.svelte`) and edit (from `data-table.svelte`) both use the same `EntryDialog` form (title, score, duration) with non-empty title + positive score/duration validation; the parent owns the `open` state via `bind:open`.
+- Hover-revealed edit/delete buttons per row. Add (from `+page.svelte`) and edit (from `data-table.svelte`) both use the same `EntryDialog` form (title, status, score, duration) with non-empty title + positive score/duration validation; the parent owns the `open` state via `bind:open`.
 - DB file lives at `<app_data_dir>/backlog.db` per platform (managed by `tauri::Manager` in `src-tauri/src/db.rs:122`).
 
 ## Stack
@@ -17,12 +19,13 @@ Tauri 2 desktop app. Tracks backlog entries with a priority score derived from r
 
 ## Layout
 - `src/` — SvelteKit app. Entry: `src/routes/+page.svelte`, layout at `src/routes/+layout.ts`. All shared code under `src/lib/`; shadcn primitives in `src/lib/components/ui/`.
-- `src/lib/db.ts` — `DbEntry` type + 5 thin `invoke()` wrappers, one per Tauri command.
-- `src/lib/priority.ts` — pure `prioritize(entries) → Entry[]` with `priority` min-max normalized to 0-100 (no I/O).
-- `src/lib/components/entry-dialog.svelte` — shared add/edit form (title, score, duration); instantiated directly by `+page.svelte` (add) and `data-table.svelte` (edit), each binding its own `open` state.
+- `src/lib/db.ts` — `DbEntry`/`EntryStatus` types + 5 thin `invoke()` wrappers, one per Tauri command.
+- `src/lib/priority.ts` — pure `prioritize(entries) → Entry[]` with `priority` min-max normalized to 0-100 (no I/O); inactive statuses (`finished`/`dropped`/`completed`) get `priority: undefined`.
+- `src/lib/components/entry-dialog.svelte` — shared add/edit form (title, score, duration, status); instantiated directly by `+page.svelte` (add) and `data-table.svelte` (edit), each binding its own `open` state.
+- `src/lib/components/status-badge.svelte` — colored `Badge` per status; used by the status column cell.
 - `src/routes/+page.svelte` — loads entries on mount, owns the `entries` state, derives `rows` via `prioritize` reactively.
 - `src/routes/data-table.svelte` — TanStack table with hover-revealed action buttons; calls back into the page on delete/edit.
-- `src/routes/columns.ts` — static `columns` array; `Priority` displays the pre-normalized 0-100 value from `prioritize`.
+- `src/routes/columns.ts` — static `columns` array; `Priority` displays the pre-normalized 0-100 value from `prioritize` (`-` when undefined, `sortUndefined: "last"`), `Status` renders `StatusBadge` and sorts by completion rank.
 - `src-tauri/` — Rust crate. Entry: `src-tauri/src/lib.rs` (commands) and `src-tauri/src/main.rs`. Crate name `backlog_lib`. DB code in `src-tauri/src/db.rs`. Capability file: `src-tauri/capabilities/default.json`.
 - Aliases: `$lib` (SvelteKit default), `@/*` -> `src/lib/*` (svelte.config.js). shadcn aliases per `components.json`.
 - App identifier: `com.luck.backlog` (tauri.conf.json). Window: 800x600, single window named `main`.

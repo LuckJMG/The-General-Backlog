@@ -54,7 +54,7 @@ async function handleDelete(id: number) {
 			submitLabel="Save"
 			submittingLabel="Saving..."
 			dialogTitle="Edit Entry"
-			onSubmit={(t, s, d) => updateEntry(editing!.id, t, s, d)}
+			onSubmit={(t, st, s, d) => updateEntry(editing!.id, t, st, s, d)}
 			onSubmitted={(u) => (entries = entries.map((e) => (e.id === u.id ? u : e)))}
 			onClose={() => (editing = null)}
 		/>

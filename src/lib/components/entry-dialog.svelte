@@ -1,14 +1,17 @@
 <script lang="ts">
+import StatusBadge from "$lib/components/status-badge.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import * as Dialog from "$lib/components/ui/dialog/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
 import { Label } from "$lib/components/ui/label/index.js";
-import type { DbEntry } from "$lib/db";
+import * as Select from "$lib/components/ui/select/index.js";
+import { type DbEntry, ENTRY_STATUSES, type EntryStatus } from "$lib/db";
 
 type Props = {
 	entry: DbEntry | null;
 	onSubmit: (
 		title: string,
+		status: EntryStatus,
 		score: number,
 		duration: number,
 	) => Promise<DbEntry>;
@@ -31,12 +34,18 @@ let {
 	onClose,
 }: Props = $props();
 
-let form = $state({ title: "", score: "", duration: "" });
+let form = $state({
+	title: "",
+	status: "pending" as EntryStatus,
+	score: "",
+	duration: "",
+});
 let submitting = $state(false);
 
 $effect(() => {
 	if (entry) {
 		form.title = entry.title;
+		form.status = entry.status;
 		form.score = String(entry.score);
 		form.duration = String(entry.duration);
 	}
@@ -60,11 +69,12 @@ async function submit() {
 	try {
 		const result = await onSubmit(
 			form.title.trim(),
+			form.status,
 			Number(form.score),
 			Number(form.duration),
 		);
 		onSubmitted?.(result);
-		form = { title: "", score: "", duration: "" };
+		form = { title: "", status: "pending", score: "", duration: "" };
 		open = false;
 	} finally {
 		submitting = false;
@@ -96,6 +106,21 @@ function handleOpenChange(next: boolean) {
 					bind:value={form.title}
 					autocomplete="off"
 				/>
+			</div>
+			<div class="flex flex-col gap-2">
+				<Label for="entry-status">Status</Label>
+				<Select.Root type="single" bind:value={form.status}>
+					<Select.Trigger id="entry-status" class="w-full">
+						<StatusBadge status={form.status} />
+					</Select.Trigger>
+					<Select.Content>
+					{#each ENTRY_STATUSES as status (status)}
+						<Select.Item value={status} label={status}>
+							<StatusBadge {status} />
+						</Select.Item>
+					{/each}
+					</Select.Content>
+				</Select.Root>
 			</div>
 			<div class="grid grid-cols-2 gap-4">
 				<div class="flex flex-col gap-2">
