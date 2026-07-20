@@ -30,6 +30,7 @@ Tauri 2 desktop app. Tracks backlog entries with a priority score derived from r
 ## Commands
 Run from repo root unless noted.
 - `just dev` — start Tauri dev (runs `bun tauri dev`, which spawns Vite on 1420 then the Rust app).
+- `just clean` — deletes the current DB state for a fresh start.
 - `just lint` — biome check with `--write` (formats + lints + organizes imports).
 - `bun run check` — `svelte-kit sync` + `svelte-check` (typecheck). Run after schema/code changes.
 - `bun tauri dev` / `bun tauri build` — same as `just dev` plus release build. `tauri.conf.json` already wires beforeDev/beforeBuild to `bun run dev` / `bun run build`.
