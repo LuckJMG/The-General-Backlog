@@ -16,12 +16,20 @@ pub struct Entry {
 
 const STATUSES: &[&str] = &["pending", "active", "dropped", "finished", "completed"];
 
-fn valid_status(status: &str) -> Result<(), String> {
-    if STATUSES.contains(&status) {
-        Ok(())
-    } else {
-        Err(format!("invalid status: {status}"))
+fn verify_entry(title: &str, status: &str, score: f64, duration: i64) -> Result<(), String> {
+    if title.trim().is_empty() {
+        return Err("title is required".to_string());
     }
+    if !STATUSES.contains(&status) {
+        return Err(format!("invalid status: {status}"));
+    }
+    if score <= 0.0 {
+        return Err("score must be positive".to_string());
+    }
+    if duration <= 0 {
+        return Err("duration must be positive".to_string());
+    }
+    Ok(())
 }
 
 const SCHEMA: &str = "CREATE TABLE IF NOT EXISTS entries (
@@ -88,7 +96,7 @@ pub fn add_entry(
     score: f64,
     duration: i64,
 ) -> Result<Entry, String> {
-    valid_status(&status)?;
+    verify_entry(&title, &status, score, duration)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     conn.execute(
         "INSERT INTO entries (title, status, score, duration) VALUES (?1, ?2, ?3, ?4)",
@@ -114,13 +122,17 @@ pub fn update_entry(
     score: f64,
     duration: i64,
 ) -> Result<Entry, String> {
-    valid_status(&status)?;
+    verify_entry(&title, &status, score, duration)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
-    conn.execute(
-        "UPDATE entries SET title = ?2, status = ?3, score = ?4, duration = ?5 WHERE id = ?1",
-        params![id, title, status, score, duration],
-    )
-    .map_err(|e| e.to_string())?;
+    let rows = conn
+        .execute(
+            "UPDATE entries SET title = ?2, status = ?3, score = ?4, duration = ?5 WHERE id = ?1",
+            params![id, title, status, score, duration],
+        )
+        .map_err(|e| e.to_string())?;
+    if rows == 0 {
+        return Err("entry not found".to_string());
+    }
     Ok(Entry {
         id,
         title,
