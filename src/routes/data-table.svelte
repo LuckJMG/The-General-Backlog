@@ -1,4 +1,4 @@
-<script lang="ts" generics="TData extends DbEntry, TValue">
+<script lang="ts">
 import ArrowDownIcon from "@lucide/svelte/icons/arrow-down";
 import ArrowUpIcon from "@lucide/svelte/icons/arrow-up";
 import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
@@ -19,17 +19,17 @@ import {
 } from "$lib/components/ui/data-table/index.js";
 import * as Table from "$lib/components/ui/table/index.js";
 import { type DbEntry } from "$lib/db";
+import type { Entry } from "$lib/priority";
 import { cn } from "$lib/utils.js";
 
-type DataTableProps<TData, TValue> = {
-	columns: ColumnDef<TData, TValue>[];
-	data: TData[];
+type DataTableProps = {
+	columns: ColumnDef<Entry>[];
+	data: Entry[];
 	onDelete: (id: number) => void;
 	onEditRequest: (entry: DbEntry) => void;
 };
 
-let { data, columns, onDelete, onEditRequest }: DataTableProps<TData, TValue> =
-	$props();
+let { data, columns, onDelete, onEditRequest }: DataTableProps = $props();
 
 let pendingDelete = $state<DbEntry | null>(null);
 let deleteOpen = $state(false);

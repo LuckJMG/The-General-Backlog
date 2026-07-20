@@ -12,12 +12,11 @@ import {
 	updateEntry,
 } from "$lib/db";
 import { prioritize } from "$lib/priority";
-import { makeColumns } from "./columns.js";
+import { columns } from "./columns.js";
 import DataTable from "./data-table.svelte";
 
 let entries = $state.raw<DbEntry[]>([]);
-let result = $derived(prioritize(entries));
-let columns = $derived(makeColumns(result.min, result.max));
+let rows = $derived(prioritize(entries));
 
 onMount(async () => {
 	await initDb();
@@ -59,7 +58,7 @@ async function handleDelete(id: number) {
 		/>
 	</div>
 	<DataTable
-		data={result.rows}
+		data={rows}
 		{columns}
 		onDelete={handleDelete}
 		onEditRequest={(e) => (editing = { ...e })}

@@ -18,11 +18,11 @@ Tauri 2 desktop app. Tracks backlog entries with a priority score derived from r
 ## Layout
 - `src/` — SvelteKit app. Entry: `src/routes/+page.svelte`, layout at `src/routes/+layout.ts`. All shared code under `src/lib/`; shadcn primitives in `src/lib/components/ui/`.
 - `src/lib/db.ts` — `DbEntry` type + 5 thin `invoke()` wrappers, one per Tauri command.
-- `src/lib/priority.ts` — pure `prioritize(entries) → { rows, min, max }` (no I/O).
+- `src/lib/priority.ts` — pure `prioritize(entries) → Entry[]` with `priority` min-max normalized to 0-100 (no I/O).
 - `src/lib/components/entry-dialog.svelte` — shared add/edit form (title, score, duration); instantiated directly by `+page.svelte` (add) and `data-table.svelte` (edit), each binding its own `open` state.
-- `src/routes/+page.svelte` — loads entries on mount, owns the `entries` state, derives `result` and `columns` reactively.
+- `src/routes/+page.svelte` — loads entries on mount, owns the `entries` state, derives `rows` via `prioritize` reactively.
 - `src/routes/data-table.svelte` — TanStack table with hover-revealed action buttons; calls back into the page on delete/edit.
-- `src/routes/columns.ts` — column defs; `Priority` cell is a 0-100 normalized render of the raw ratio.
+- `src/routes/columns.ts` — static `columns` array; `Priority` displays the pre-normalized 0-100 value from `prioritize`.
 - `src-tauri/` — Rust crate. Entry: `src-tauri/src/lib.rs` (commands) and `src-tauri/src/main.rs`. Crate name `backlog_lib`. DB code in `src-tauri/src/db.rs`. Capability file: `src-tauri/capabilities/default.json`.
 - Aliases: `$lib` (SvelteKit default), `@/*` -> `src/lib/*` (svelte.config.js). shadcn aliases per `components.json`.
 - App identifier: `com.luck.backlog` (tauri.conf.json). Window: 800x600, single window named `main`.
