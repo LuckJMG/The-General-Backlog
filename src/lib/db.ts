@@ -10,12 +10,17 @@ export const ENTRY_STATUSES = [
 
 export type EntryStatus = (typeof ENTRY_STATUSES)[number];
 
+export const ENTRY_INTERESTS = ["neutral", "high", "low"] as const;
+
+export type EntryInterest = (typeof ENTRY_INTERESTS)[number];
+
 export type DbEntry = {
 	id: number;
 	title: string;
 	status: EntryStatus;
 	score: number;
 	duration: number;
+	interest: EntryInterest;
 };
 
 export async function initDb() {
@@ -31,8 +36,15 @@ export async function addEntry(
 	status: EntryStatus,
 	score: number,
 	duration: number,
+	interest: EntryInterest,
 ): Promise<DbEntry> {
-	return invoke<DbEntry>("add_entry", { title, status, score, duration });
+	return invoke<DbEntry>("add_entry", {
+		title,
+		status,
+		score,
+		duration,
+		interest,
+	});
 }
 
 export async function updateEntry(
@@ -41,6 +53,7 @@ export async function updateEntry(
 	status: EntryStatus,
 	score: number,
 	duration: number,
+	interest: EntryInterest,
 ): Promise<DbEntry> {
 	return invoke<DbEntry>("update_entry", {
 		id,
@@ -48,6 +61,7 @@ export async function updateEntry(
 		status,
 		score,
 		duration,
+		interest,
 	});
 }
 

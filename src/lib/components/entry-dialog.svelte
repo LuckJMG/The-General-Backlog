@@ -1,11 +1,18 @@
 <script lang="ts">
+import InterestBadge from "$lib/components/interest-badge.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import * as Dialog from "$lib/components/ui/dialog/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
 import { Label } from "$lib/components/ui/label/index.js";
 import * as Select from "$lib/components/ui/select/index.js";
-import { type DbEntry, ENTRY_STATUSES, type EntryStatus } from "$lib/db";
+import {
+	type DbEntry,
+	ENTRY_INTERESTS,
+	ENTRY_STATUSES,
+	type EntryInterest,
+	type EntryStatus,
+} from "$lib/db";
 
 type Props = {
 	entry: DbEntry | null;
@@ -14,6 +21,7 @@ type Props = {
 		status: EntryStatus,
 		score: number,
 		duration: number,
+		interest: EntryInterest,
 	) => Promise<DbEntry>;
 	submitLabel: string;
 	submittingLabel: string;
@@ -37,6 +45,7 @@ let {
 let form = $state({
 	title: "",
 	status: "pending" as EntryStatus,
+	interest: "neutral" as EntryInterest,
 	score: "",
 	duration: "",
 });
@@ -46,6 +55,7 @@ $effect(() => {
 	if (entry) {
 		form.title = entry.title;
 		form.status = entry.status;
+		form.interest = entry.interest;
 		form.score = String(entry.score);
 		form.duration = String(entry.duration);
 	}
@@ -72,9 +82,16 @@ async function submit() {
 			form.status,
 			Number(form.score),
 			Number(form.duration),
+			form.interest,
 		);
 		onSubmitted?.(result);
-		form = { title: "", status: "pending", score: "", duration: "" };
+		form = {
+			title: "",
+			status: "pending",
+			interest: "neutral",
+			score: "",
+			duration: "",
+		};
 		open = false;
 	} finally {
 		submitting = false;
@@ -107,20 +124,37 @@ function handleOpenChange(next: boolean) {
 					autocomplete="off"
 				/>
 			</div>
-			<div class="flex flex-col gap-2">
-				<Label for="entry-status">Status</Label>
-				<Select.Root type="single" bind:value={form.status}>
-					<Select.Trigger id="entry-status" class="w-full">
-						<StatusBadge status={form.status} />
-					</Select.Trigger>
-					<Select.Content>
-					{#each ENTRY_STATUSES as status (status)}
-						<Select.Item value={status} label={status}>
-							<StatusBadge {status} />
-						</Select.Item>
-					{/each}
-					</Select.Content>
-				</Select.Root>
+			<div class="grid grid-cols-2 gap-4">
+				<div class="flex flex-col gap-2">
+					<Label for="entry-status">Status</Label>
+					<Select.Root type="single" bind:value={form.status}>
+						<Select.Trigger id="entry-status" class="w-full">
+							<StatusBadge status={form.status} />
+						</Select.Trigger>
+						<Select.Content>
+							{#each ENTRY_STATUSES as status (status)}
+								<Select.Item value={status} label={status}>
+									<StatusBadge {status} />
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<div class="flex flex-col gap-2">
+					<Label for="entry-interest">Interest</Label>
+					<Select.Root type="single" bind:value={form.interest}>
+						<Select.Trigger id="entry-interest" class="w-full">
+							<InterestBadge interest={form.interest} />
+						</Select.Trigger>
+						<Select.Content>
+							{#each ENTRY_INTERESTS as interest (interest)}
+								<Select.Item value={interest} label={interest}>
+									<InterestBadge {interest} />
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
 			</div>
 			<div class="grid grid-cols-2 gap-4">
 				<div class="flex flex-col gap-2">

@@ -12,11 +12,19 @@ pub struct Entry {
     pub status: String,
     pub score: f64,
     pub duration: i64,
+    pub interest: String,
 }
 
 const STATUSES: &[&str] = &["pending", "active", "dropped", "finished", "completed"];
+const INTERESTS: &[&str] = &["neutral", "high", "low"];
 
-fn verify_entry(title: &str, status: &str, score: f64, duration: i64) -> Result<(), String> {
+fn verify_entry(
+    title: &str,
+    status: &str,
+    score: f64,
+    duration: i64,
+    interest: &str,
+) -> Result<(), String> {
     if title.trim().is_empty() {
         return Err("title is required".to_string());
     }
@@ -29,6 +37,9 @@ fn verify_entry(title: &str, status: &str, score: f64, duration: i64) -> Result<
     if duration <= 0 {
         return Err("duration must be positive".to_string());
     }
+    if !INTERESTS.contains(&interest) {
+        return Err(format!("invalid interest: {interest}"));
+    }
     Ok(())
 }
 
@@ -37,15 +48,16 @@ const SCHEMA: &str = "CREATE TABLE IF NOT EXISTS entries (
     title TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     score REAL NOT NULL,
-    duration INTEGER NOT NULL
+    duration INTEGER NOT NULL,
+    interest TEXT NOT NULL DEFAULT 'neutral'
 )";
 
-const SEED: &[(&str, &str, f64, i64)] = &[
-    ("The Pragmatic Programmer", "pending", 8.4, 12),
-    ("Disco Elysium", "pending", 9.1, 25),
-    ("Dune: Part Two", "pending", 8.0, 3),
-    ("Hades", "pending", 8.7, 30),
-    ("Project Hail Mary", "pending", 8.6, 16),
+const SEED: &[(&str, &str, f64, i64, &str)] = &[
+    ("The Pragmatic Programmer", "pending", 8.4, 12, "neutral"),
+    ("Disco Elysium", "pending", 9.1, 25, "neutral"),
+    ("Dune: Part Two", "pending", 8.0, 3, "neutral"),
+    ("Hades", "pending", 8.7, 30, "neutral"),
+    ("Project Hail Mary", "pending", 8.6, 16, "neutral"),
 ];
 
 #[tauri::command]
@@ -56,10 +68,10 @@ pub fn init_db(db: State<'_, Db>) -> Result<(), String> {
         .query_row("SELECT COUNT(*) FROM entries", [], |r| r.get(0))
         .map_err(|e| e.to_string())?;
     if count == 0 {
-        for (title, status, score, duration) in SEED {
+        for (title, status, score, duration, interest) in SEED {
             conn.execute(
-                "INSERT INTO entries (title, status, score, duration) VALUES (?1, ?2, ?3, ?4)",
-                params![*title, *status, *score, *duration],
+                "INSERT INTO entries (title, status, score, duration, interest) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![*title, *status, *score, *duration, *interest],
             )
             .map_err(|e| e.to_string())?;
         }
@@ -71,7 +83,7 @@ pub fn init_db(db: State<'_, Db>) -> Result<(), String> {
 pub fn list_entries(db: State<'_, Db>) -> Result<Vec<Entry>, String> {
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let mut stmt = conn
-        .prepare("SELECT id, title, status, score, duration FROM entries")
+        .prepare("SELECT id, title, status, score, duration, interest FROM entries")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -81,6 +93,7 @@ pub fn list_entries(db: State<'_, Db>) -> Result<Vec<Entry>, String> {
                 status: r.get(2)?,
                 score: r.get(3)?,
                 duration: r.get(4)?,
+                interest: r.get(5)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -95,12 +108,13 @@ pub fn add_entry(
     status: String,
     score: f64,
     duration: i64,
+    interest: String,
 ) -> Result<Entry, String> {
-    verify_entry(&title, &status, score, duration)?;
+    verify_entry(&title, &status, score, duration, &interest)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     conn.execute(
-        "INSERT INTO entries (title, status, score, duration) VALUES (?1, ?2, ?3, ?4)",
-        params![title, status, score, duration],
+        "INSERT INTO entries (title, status, score, duration, interest) VALUES (?1, ?2, ?3, ?4, ?5)",
+        params![title, status, score, duration, interest],
     )
     .map_err(|e| e.to_string())?;
     let id = conn.last_insert_rowid();
@@ -110,6 +124,7 @@ pub fn add_entry(
         status,
         score,
         duration,
+        interest,
     })
 }
 
@@ -121,13 +136,14 @@ pub fn update_entry(
     status: String,
     score: f64,
     duration: i64,
+    interest: String,
 ) -> Result<Entry, String> {
-    verify_entry(&title, &status, score, duration)?;
+    verify_entry(&title, &status, score, duration, &interest)?;
     let conn = db.0.lock().map_err(|e| e.to_string())?;
     let rows = conn
         .execute(
-            "UPDATE entries SET title = ?2, status = ?3, score = ?4, duration = ?5 WHERE id = ?1",
-            params![id, title, status, score, duration],
+            "UPDATE entries SET title = ?2, status = ?3, score = ?4, duration = ?5, interest = ?6 WHERE id = ?1",
+            params![id, title, status, score, duration, interest],
         )
         .map_err(|e| e.to_string())?;
     if rows == 0 {
@@ -139,6 +155,7 @@ pub fn update_entry(
         status,
         score,
         duration,
+        interest,
     })
 }
 
