@@ -4,7 +4,7 @@ import InterestBadge from "$lib/components/interest-badge.svelte";
 import RatingBadge from "$lib/components/rating-badge.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
 import { renderComponent } from "$lib/components/ui/data-table/index.js";
-import type { EntryInterest, EntryStatus } from "$lib/db";
+import { INTEREST_RANK, STATUS_RANK } from "$lib/db";
 import type { Entry } from "$lib/priority";
 
 declare module "@tanstack/table-core" {
@@ -13,20 +13,6 @@ declare module "@tanstack/table-core" {
 		align?: "left" | "center" | "right";
 	}
 }
-
-const STATUS_RANK: Record<EntryStatus, number> = {
-	pending: 0,
-	active: 1,
-	dropped: 2,
-	finished: 3,
-	completed: 4,
-};
-
-const INTEREST_RANK: Record<EntryInterest, number> = {
-	high: 0,
-	neutral: 1,
-	low: 2,
-};
 
 export const columns: ColumnDef<Entry>[] = [
 	{ accessorKey: "title", header: "Title" },

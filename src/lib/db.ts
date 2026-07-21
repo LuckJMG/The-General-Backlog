@@ -28,8 +28,27 @@ export const RATING_LABELS: Record<EntryRating, string> = {
 	7: "Masterpiece",
 };
 
-export type DbEntry = {
-	id: number;
+export const STATUS_RANK: Record<EntryStatus, number> = {
+	pending: 0,
+	active: 1,
+	dropped: 2,
+	finished: 3,
+	completed: 4,
+};
+
+export const INTEREST_RANK: Record<EntryInterest, number> = {
+	high: 0,
+	neutral: 1,
+	low: 2,
+};
+
+export const INTEREST_MULTIPLIER: Record<EntryInterest, number> = {
+	neutral: 1.0,
+	high: 1.2,
+	low: 0.8,
+};
+
+export type EntryInput = {
 	title: string;
 	rating: EntryRating | null;
 	status: EntryStatus;
@@ -39,6 +58,8 @@ export type DbEntry = {
 	comments: string | null;
 };
 
+export type DbEntry = EntryInput & { id: number };
+
 export async function initDb() {
 	await invoke("init_db");
 }
@@ -47,46 +68,15 @@ export async function listEntries(): Promise<DbEntry[]> {
 	return invoke<DbEntry[]>("list_entries");
 }
 
-export async function addEntry(
-	title: string,
-	rating: EntryRating | null,
-	status: EntryStatus,
-	score: number,
-	duration: number,
-	interest: EntryInterest,
-	comments: string | null,
-): Promise<DbEntry> {
-	return invoke<DbEntry>("add_entry", {
-		title,
-		rating,
-		status,
-		score,
-		duration,
-		interest,
-		comments,
-	});
+export async function addEntry(input: EntryInput): Promise<DbEntry> {
+	return invoke<DbEntry>("add_entry", { input });
 }
 
 export async function updateEntry(
 	id: number,
-	title: string,
-	rating: EntryRating | null,
-	status: EntryStatus,
-	score: number,
-	duration: number,
-	interest: EntryInterest,
-	comments: string | null,
+	input: EntryInput,
 ): Promise<DbEntry> {
-	return invoke<DbEntry>("update_entry", {
-		id,
-		title,
-		rating,
-		status,
-		score,
-		duration,
-		interest,
-		comments,
-	});
+	return invoke<DbEntry>("update_entry", { id, input });
 }
 
 export async function deleteEntry(id: number): Promise<void> {

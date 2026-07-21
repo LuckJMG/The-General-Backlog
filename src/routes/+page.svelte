@@ -1,6 +1,8 @@
 <script lang="ts">
 import PlusIcon from "@lucide/svelte/icons/plus";
 import { onMount } from "svelte";
+import { columns } from "$lib/columns.js";
+import DataTable from "$lib/components/data-table.svelte";
 import EntryDialog from "$lib/components/entry-dialog.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import {
@@ -12,8 +14,6 @@ import {
 	updateEntry,
 } from "$lib/db";
 import { prioritize } from "$lib/priority";
-import { columns } from "./columns.js";
-import DataTable from "./data-table.svelte";
 
 let entries = $state.raw<DbEntry[]>([]);
 let rows = $derived(prioritize(entries));
@@ -56,8 +56,7 @@ async function handleDelete(id: number) {
 			dialogTitle="Edit Entry"
 			showRating
 			showComments
-			onSubmit={(t, r, st, s, d, i, c) =>
-				updateEntry(editing!.id, t, r, st, s, d, i, c)}
+			onSubmit={(input) => updateEntry(editing!.id, input)}
 			onSubmitted={(u) => (entries = entries.map((e) => (e.id === u.id ? u : e)))}
 			onClose={() => (editing = null)}
 		/>

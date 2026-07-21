@@ -1,4 +1,5 @@
 <script lang="ts">
+import BadgeSelect from "$lib/components/badge-select.svelte";
 import InterestBadge from "$lib/components/interest-badge.svelte";
 import RatingBadge from "$lib/components/rating-badge.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
@@ -6,12 +7,12 @@ import { Button } from "$lib/components/ui/button/index.js";
 import * as Dialog from "$lib/components/ui/dialog/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
 import { Label } from "$lib/components/ui/label/index.js";
-import * as Select from "$lib/components/ui/select/index.js";
 import { Textarea } from "$lib/components/ui/textarea/index.js";
 import {
 	type DbEntry,
 	ENTRY_INTERESTS,
 	ENTRY_STATUSES,
+	type EntryInput,
 	type EntryInterest,
 	type EntryRating,
 	type EntryStatus,
@@ -20,15 +21,7 @@ import {
 
 type Props = {
 	entry: DbEntry | null;
-	onSubmit: (
-		title: string,
-		rating: EntryRating | null,
-		status: EntryStatus,
-		score: number,
-		duration: number,
-		interest: EntryInterest,
-		comments: string | null,
-	) => Promise<DbEntry>;
+	onSubmit: (input: EntryInput) => Promise<DbEntry>;
 	submitLabel: string;
 	submittingLabel: string;
 	dialogTitle: string;
@@ -52,15 +45,27 @@ let {
 	onClose,
 }: Props = $props();
 
-let form = $state({
+type Form = {
+	title: string;
+	rating: string;
+	status: EntryStatus;
+	interest: EntryInterest;
+	score: string;
+	duration: string;
+	comments: string;
+};
+
+const DEFAULT_FORM: Form = {
 	title: "",
 	rating: "",
-	status: "pending" as EntryStatus,
-	interest: "neutral" as EntryInterest,
+	status: "pending",
+	interest: "neutral",
 	score: "",
 	duration: "",
 	comments: "",
-});
+};
+
+let form = $state<Form>({ ...DEFAULT_FORM });
 let submitting = $state(false);
 
 $effect(() => {
@@ -94,25 +99,17 @@ async function submit() {
 		const rating: EntryRating | null =
 			form.rating === "" ? null : (Number(form.rating) as EntryRating);
 		const comments = form.comments.trim() === "" ? null : form.comments.trim();
-		const result = await onSubmit(
-			form.title.trim(),
+		const result = await onSubmit({
+			title: form.title.trim(),
 			rating,
-			form.status,
-			Number(form.score),
-			Number(form.duration),
-			form.interest,
+			status: form.status,
+			score: Number(form.score),
+			duration: Number(form.duration),
+			interest: form.interest,
 			comments,
-		);
+		});
 		onSubmitted?.(result);
-		form = {
-			title: "",
-			rating: "",
-			status: "pending",
-			interest: "neutral",
-			score: "",
-			duration: "",
-			comments: "",
-		};
+		form = { ...DEFAULT_FORM };
 		open = false;
 	} finally {
 		submitting = false;
@@ -123,6 +120,8 @@ function handleOpenChange(next: boolean) {
 	open = next;
 	if (!next) onClose?.();
 }
+
+const RATING_OPTIONS: readonly string[] = ["", ...RATING_VALUES.map(String)];
 </script>
 
 <Dialog.Root bind:open onOpenChange={handleOpenChange}>
@@ -139,43 +138,29 @@ function handleOpenChange(next: boolean) {
 		>
 			<div class="flex flex-col gap-2">
 				<Label for="entry-title">Title</Label>
-				<Input
-					id="entry-title"
-					bind:value={form.title}
-					autocomplete="off"
-				/>
+				<Input id="entry-title" bind:value={form.title} autocomplete="off" />
 			</div>
 			<div class="grid grid-cols-2 gap-4">
-				<div class="flex flex-col gap-2">
-					<Label for="entry-status">Status</Label>
-					<Select.Root type="single" bind:value={form.status}>
-						<Select.Trigger id="entry-status" class="w-full">
-							<StatusBadge status={form.status} />
-						</Select.Trigger>
-						<Select.Content>
-							{#each ENTRY_STATUSES as status (status)}
-								<Select.Item value={status} label={status}>
-									<StatusBadge {status} />
-								</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
-				<div class="flex flex-col gap-2">
-					<Label for="entry-interest">Interest</Label>
-					<Select.Root type="single" bind:value={form.interest}>
-						<Select.Trigger id="entry-interest" class="w-full">
-							<InterestBadge interest={form.interest} />
-						</Select.Trigger>
-						<Select.Content>
-							{#each ENTRY_INTERESTS as interest (interest)}
-								<Select.Item value={interest} label={interest}>
-									<InterestBadge {interest} />
-								</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
+				<BadgeSelect
+					id="entry-status"
+					label="Status"
+					bind:value={form.status}
+					options={ENTRY_STATUSES}
+				>
+					{#snippet render(status: EntryStatus)}
+						<StatusBadge {status} />
+					{/snippet}
+				</BadgeSelect>
+				<BadgeSelect
+					id="entry-interest"
+					label="Interest"
+					bind:value={form.interest}
+					options={ENTRY_INTERESTS}
+				>
+					{#snippet render(interest: EntryInterest)}
+						<InterestBadge {interest} />
+					{/snippet}
+				</BadgeSelect>
 			</div>
 			<div class="grid grid-cols-2 gap-4">
 				<div class="flex flex-col gap-2">
@@ -199,28 +184,20 @@ function handleOpenChange(next: boolean) {
 				</div>
 			</div>
 			{#if showRating}
-				<div class="flex flex-col gap-2">
-					<Label for="entry-rating">Rating</Label>
-					<Select.Root type="single" bind:value={form.rating}>
-						<Select.Trigger id="entry-rating" class="w-full">
-							{#if form.rating === ""}
-								<span class="text-muted-foreground">-</span>
-							{:else}
-								<RatingBadge rating={Number(form.rating) as EntryRating} />
-							{/if}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="" label="-">
-								<span class="text-muted-foreground">-</span>
-							</Select.Item>
-							{#each RATING_VALUES as rating (rating)}
-								<Select.Item value={String(rating)} label={String(rating)}>
-									<RatingBadge {rating} />
-								</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
+				<BadgeSelect
+					id="entry-rating"
+					label="Rating"
+					bind:value={form.rating}
+					options={RATING_OPTIONS}
+				>
+					{#snippet render(rating: string)}
+						{#if rating === ""}
+							<span class="text-muted-foreground">-</span>
+						{:else}
+							<RatingBadge rating={Number(rating) as EntryRating} />
+						{/if}
+					{/snippet}
+				</BadgeSelect>
 			{/if}
 			{#if showComments}
 				<div class="flex flex-col gap-2">

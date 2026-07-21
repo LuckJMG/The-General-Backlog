@@ -1,4 +1,4 @@
-import type { DbEntry, EntryInterest, EntryStatus } from "./db";
+import { type DbEntry, type EntryStatus, INTEREST_MULTIPLIER } from "./db";
 
 export type Entry = DbEntry & { priority?: number };
 
@@ -8,28 +8,23 @@ const INACTIVE: ReadonlySet<EntryStatus> = new Set([
 	"completed",
 ]);
 
-const INTEREST_MULTIPLIER: Record<EntryInterest, number> = {
-	neutral: 1.0,
-	high: 1.2,
-	low: 0.8,
-};
+function rawScore(e: DbEntry): number {
+	return (e.score / e.duration) * INTEREST_MULTIPLIER[e.interest];
+}
 
 export function prioritize(entries: DbEntry[]): Entry[] {
-	const ranked = entries.filter((e) => !INACTIVE.has(e.status));
-	let min = Infinity;
-	let max = -Infinity;
-	for (const e of ranked) {
-		const p = (e.score / e.duration) * INTEREST_MULTIPLIER[e.interest];
-		if (p < min) min = p;
-		if (p > max) max = p;
-	}
+	const activeScores = entries
+		.filter((e) => !INACTIVE.has(e.status))
+		.map(rawScore);
+	const min = activeScores.length ? Math.min(...activeScores) : 0;
+	const max = activeScores.length ? Math.max(...activeScores) : 0;
 	const span = max - min;
-	return entries.map((e) => {
-		if (INACTIVE.has(e.status)) return { ...e, priority: undefined };
-		const p = (e.score / e.duration) * INTEREST_MULTIPLIER[e.interest];
-		return {
-			...e,
-			priority: span === 0 ? 100 : Math.round(((p - min) / span) * 100),
-		};
-	});
+	return entries.map((e) => ({
+		...e,
+		priority: INACTIVE.has(e.status)
+			? undefined
+			: span === 0
+				? 100
+				: Math.round(((rawScore(e) - min) / span) * 100),
+	}));
 }
