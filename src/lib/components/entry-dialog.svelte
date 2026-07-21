@@ -7,6 +7,7 @@ import * as Dialog from "$lib/components/ui/dialog/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
 import { Label } from "$lib/components/ui/label/index.js";
 import * as Select from "$lib/components/ui/select/index.js";
+import { Textarea } from "$lib/components/ui/textarea/index.js";
 import {
 	type DbEntry,
 	ENTRY_INTERESTS,
@@ -26,12 +27,14 @@ type Props = {
 		score: number,
 		duration: number,
 		interest: EntryInterest,
+		comments: string | null,
 	) => Promise<DbEntry>;
 	submitLabel: string;
 	submittingLabel: string;
 	dialogTitle: string;
 	open?: boolean;
 	showRating?: boolean;
+	showComments?: boolean;
 	onSubmitted?: (entry: DbEntry) => void;
 	onClose?: () => void;
 };
@@ -44,6 +47,7 @@ let {
 	dialogTitle,
 	open = $bindable(false),
 	showRating = false,
+	showComments = false,
 	onSubmitted,
 	onClose,
 }: Props = $props();
@@ -55,6 +59,7 @@ let form = $state({
 	interest: "neutral" as EntryInterest,
 	score: "",
 	duration: "",
+	comments: "",
 });
 let submitting = $state(false);
 
@@ -66,6 +71,7 @@ $effect(() => {
 		form.interest = entry.interest;
 		form.score = String(entry.score);
 		form.duration = String(entry.duration);
+		form.comments = entry.comments ?? "";
 	}
 });
 
@@ -87,6 +93,7 @@ async function submit() {
 	try {
 		const rating: EntryRating | null =
 			form.rating === "" ? null : (Number(form.rating) as EntryRating);
+		const comments = form.comments.trim() === "" ? null : form.comments.trim();
 		const result = await onSubmit(
 			form.title.trim(),
 			rating,
@@ -94,6 +101,7 @@ async function submit() {
 			Number(form.score),
 			Number(form.duration),
 			form.interest,
+			comments,
 		);
 		onSubmitted?.(result);
 		form = {
@@ -103,6 +111,7 @@ async function submit() {
 			interest: "neutral",
 			score: "",
 			duration: "",
+			comments: "",
 		};
 		open = false;
 	} finally {
@@ -211,6 +220,17 @@ function handleOpenChange(next: boolean) {
 							{/each}
 						</Select.Content>
 					</Select.Root>
+				</div>
+			{/if}
+			{#if showComments}
+				<div class="flex flex-col gap-2">
+					<Label for="entry-comments">Comments</Label>
+					<Textarea
+						id="entry-comments"
+						bind:value={form.comments}
+						rows={4}
+						class="min-h-24"
+					/>
 				</div>
 			{/if}
 			<Dialog.Footer>

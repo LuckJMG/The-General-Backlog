@@ -36,6 +36,7 @@ export type DbEntry = {
 	score: number;
 	duration: number;
 	interest: EntryInterest;
+	comments: string | null;
 };
 
 export async function initDb() {
@@ -53,6 +54,7 @@ export async function addEntry(
 	score: number,
 	duration: number,
 	interest: EntryInterest,
+	comments: string | null,
 ): Promise<DbEntry> {
 	return invoke<DbEntry>("add_entry", {
 		title,
@@ -61,6 +63,7 @@ export async function addEntry(
 		score,
 		duration,
 		interest,
+		comments,
 	});
 }
 
@@ -72,6 +75,7 @@ export async function updateEntry(
 	score: number,
 	duration: number,
 	interest: EntryInterest,
+	comments: string | null,
 ): Promise<DbEntry> {
 	return invoke<DbEntry>("update_entry", {
 		id,
@@ -81,6 +85,7 @@ export async function updateEntry(
 		score,
 		duration,
 		interest,
+		comments,
 	});
 }
 
