@@ -1,5 +1,6 @@
 <script lang="ts">
 import InterestBadge from "$lib/components/interest-badge.svelte";
+import RatingBadge from "$lib/components/rating-badge.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import * as Dialog from "$lib/components/ui/dialog/index.js";
@@ -11,13 +12,16 @@ import {
 	ENTRY_INTERESTS,
 	ENTRY_STATUSES,
 	type EntryInterest,
+	type EntryRating,
 	type EntryStatus,
+	RATING_VALUES,
 } from "$lib/db";
 
 type Props = {
 	entry: DbEntry | null;
 	onSubmit: (
 		title: string,
+		rating: EntryRating | null,
 		status: EntryStatus,
 		score: number,
 		duration: number,
@@ -27,6 +31,7 @@ type Props = {
 	submittingLabel: string;
 	dialogTitle: string;
 	open?: boolean;
+	showRating?: boolean;
 	onSubmitted?: (entry: DbEntry) => void;
 	onClose?: () => void;
 };
@@ -38,12 +43,14 @@ let {
 	submittingLabel,
 	dialogTitle,
 	open = $bindable(false),
+	showRating = false,
 	onSubmitted,
 	onClose,
 }: Props = $props();
 
 let form = $state({
 	title: "",
+	rating: "",
 	status: "pending" as EntryStatus,
 	interest: "neutral" as EntryInterest,
 	score: "",
@@ -54,6 +61,7 @@ let submitting = $state(false);
 $effect(() => {
 	if (entry) {
 		form.title = entry.title;
+		form.rating = entry.rating == null ? "" : String(entry.rating);
 		form.status = entry.status;
 		form.interest = entry.interest;
 		form.score = String(entry.score);
@@ -77,8 +85,11 @@ async function submit() {
 	if (!canSubmit) return;
 	submitting = true;
 	try {
+		const rating: EntryRating | null =
+			form.rating === "" ? null : (Number(form.rating) as EntryRating);
 		const result = await onSubmit(
 			form.title.trim(),
+			rating,
 			form.status,
 			Number(form.score),
 			Number(form.duration),
@@ -87,6 +98,7 @@ async function submit() {
 		onSubmitted?.(result);
 		form = {
 			title: "",
+			rating: "",
 			status: "pending",
 			interest: "neutral",
 			score: "",
@@ -177,6 +189,30 @@ function handleOpenChange(next: boolean) {
 					/>
 				</div>
 			</div>
+			{#if showRating}
+				<div class="flex flex-col gap-2">
+					<Label for="entry-rating">Rating</Label>
+					<Select.Root type="single" bind:value={form.rating}>
+						<Select.Trigger id="entry-rating" class="w-full">
+							{#if form.rating === ""}
+								<span class="text-muted-foreground">-</span>
+							{:else}
+								<RatingBadge rating={Number(form.rating) as EntryRating} />
+							{/if}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="" label="-">
+								<span class="text-muted-foreground">-</span>
+							</Select.Item>
+							{#each RATING_VALUES as rating (rating)}
+								<Select.Item value={String(rating)} label={String(rating)}>
+									<RatingBadge {rating} />
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+			{/if}
 			<Dialog.Footer>
 				<Button type="submit" disabled={!canSubmit || submitting}>
 					{submitting ? submittingLabel : submitLabel}

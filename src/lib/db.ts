@@ -14,9 +14,24 @@ export const ENTRY_INTERESTS = ["neutral", "high", "low"] as const;
 
 export type EntryInterest = (typeof ENTRY_INTERESTS)[number];
 
+export const RATING_VALUES = [1, 2, 3, 4, 5, 6, 7] as const;
+
+export type EntryRating = (typeof RATING_VALUES)[number];
+
+export const RATING_LABELS: Record<EntryRating, string> = {
+	1: "Blasphemy",
+	2: "Horrible",
+	3: "Bad",
+	4: "Neutral",
+	5: "Good",
+	6: "Excellent",
+	7: "Masterpiece",
+};
+
 export type DbEntry = {
 	id: number;
 	title: string;
+	rating: EntryRating | null;
 	status: EntryStatus;
 	score: number;
 	duration: number;
@@ -33,6 +48,7 @@ export async function listEntries(): Promise<DbEntry[]> {
 
 export async function addEntry(
 	title: string,
+	rating: EntryRating | null,
 	status: EntryStatus,
 	score: number,
 	duration: number,
@@ -40,6 +56,7 @@ export async function addEntry(
 ): Promise<DbEntry> {
 	return invoke<DbEntry>("add_entry", {
 		title,
+		rating,
 		status,
 		score,
 		duration,
@@ -50,6 +67,7 @@ export async function addEntry(
 export async function updateEntry(
 	id: number,
 	title: string,
+	rating: EntryRating | null,
 	status: EntryStatus,
 	score: number,
 	duration: number,
@@ -58,6 +76,7 @@ export async function updateEntry(
 	return invoke<DbEntry>("update_entry", {
 		id,
 		title,
+		rating,
 		status,
 		score,
 		duration,

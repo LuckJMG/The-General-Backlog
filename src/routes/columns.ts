@@ -1,6 +1,7 @@
 import type { ColumnDef, RowData } from "@tanstack/table-core";
 import type { Component } from "svelte";
 import InterestBadge from "$lib/components/interest-badge.svelte";
+import RatingBadge from "$lib/components/rating-badge.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
 import { renderComponent } from "$lib/components/ui/data-table/index.js";
 import type { EntryInterest, EntryStatus } from "$lib/db";
@@ -29,6 +30,18 @@ const INTEREST_RANK: Record<EntryInterest, number> = {
 
 export const columns: ColumnDef<Entry>[] = [
 	{ accessorKey: "title", header: "Title" },
+	{
+		accessorKey: "rating",
+		header: "Rating",
+		meta: { headAlign: "center", align: "center" },
+		accessorFn: (row) => row.rating ?? undefined,
+		sortUndefined: "last",
+		sortingFn: "basic",
+		cell: (c) =>
+			renderComponent(RatingBadge as Component<Record<string, unknown>>, {
+				rating: c.getValue(),
+			}),
+	},
 	{
 		accessorKey: "status",
 		header: "Status",
