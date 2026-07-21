@@ -108,7 +108,9 @@ const table = createSvelteTable({
 						<Table.Cell
 							class={cell.column.columnDef.meta?.align === "right"
 								? "text-right"
-								: undefined}
+								: cell.column.columnDef.meta?.align === "center"
+									? "text-center"
+									: undefined}
 						>
 							<FlexRender
 								content={cell.column.columnDef.cell}
