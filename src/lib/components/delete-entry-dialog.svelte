@@ -34,7 +34,10 @@ let {
 				variant="destructive"
 				class="bg-red-600 hover:bg-red-700 text-white"
 				onclick={() => {
-					if (entry) onConfirm(entry.id);
+					if (entry) {
+						onConfirm(entry.id);
+						open = false;
+					}
 				}}
 			>
 				Delete
