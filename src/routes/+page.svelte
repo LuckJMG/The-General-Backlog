@@ -1,10 +1,12 @@
 <script lang="ts">
 import PlusIcon from "@lucide/svelte/icons/plus";
+import SettingsIcon from "@lucide/svelte/icons/settings";
 import { onMount } from "svelte";
 import { columns } from "$lib/columns.js";
 import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
 import DataTable from "$lib/components/data-table.svelte";
 import EditEntryDialog from "$lib/components/edit-entry-dialog.svelte";
+import SettingsDialog from "$lib/components/settings-dialog.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import { type DbEntry, deleteEntry, initDb, listEntries } from "$lib/db";
 import { prioritize } from "$lib/priority";
@@ -19,6 +21,7 @@ onMount(async () => {
 
 let addOpen = $state(false);
 let editOpen = $state(false);
+let settingsOpen = $state(false);
 let editing = $state<DbEntry | null>(null);
 
 async function handleDelete(id: number) {
@@ -28,10 +31,18 @@ async function handleDelete(id: number) {
 </script>
 
 <div class="m-16">
-	<div class="mb-4 flex justify-start">
+	<div class="mb-4 flex justify-end gap-2">
 		<Button variant="outline" onclick={() => (addOpen = true)}>
 			<PlusIcon />
 			Add entry
+		</Button>
+		<Button
+			variant="ghost"
+			size="icon"
+			aria-label="Settings"
+			onclick={() => (settingsOpen = true)}
+		>
+			<SettingsIcon />
 		</Button>
 		<AddEntryDialog
 			bind:open={addOpen}
@@ -42,6 +53,10 @@ async function handleDelete(id: number) {
 			entry={editing}
 			onSubmitted={(u) => (entries = entries.map((e) => (e.id === u.id ? u : e)))}
 			onClose={() => (editing = null)}
+		/>
+		<SettingsDialog
+			bind:open={settingsOpen}
+			onReplaced={(r) => (entries = r)}
 		/>
 	</div>
 	<DataTable

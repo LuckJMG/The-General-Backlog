@@ -82,3 +82,11 @@ export async function updateEntry(
 export async function deleteEntry(id: number): Promise<void> {
 	await invoke("delete_entry", { id });
 }
+
+export async function importEntries(json: string): Promise<DbEntry[]> {
+	return invoke<DbEntry[]>("import_entries", { json });
+}
+
+export async function exportEntries(): Promise<string> {
+	return invoke<string>("export_entries");
+}

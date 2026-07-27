@@ -17,6 +17,22 @@ pub struct Entry {
     pub comments: Option<String>,
 }
 
+#[derive(Serialize)]
+struct ExportedEntry {
+    pub title: String,
+    pub rating: Option<i64>,
+    pub status: String,
+    pub score: f64,
+    pub duration: i64,
+    pub interest: String,
+    pub comments: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct ImportPayload {
+    entries: Vec<EntryInput>,
+}
+
 #[derive(Deserialize)]
 pub struct EntryInput {
     pub title: String,
@@ -208,6 +224,71 @@ pub fn delete_entry(db: State<'_, Db>, id: i64) -> Result<(), String> {
     conn.execute("DELETE FROM entries WHERE id = ?1", params![id])
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+#[tauri::command]
+pub fn import_entries(db: State<'_, Db>, json: String) -> Result<Vec<Entry>, String> {
+    let payload: ImportPayload =
+        serde_json::from_str(&json).map_err(|e| format!("invalid JSON: {e}"))?;
+    let mut conn = db.0.lock().map_err(|e| e.to_string())?;
+    let tx = conn.transaction().map_err(|e| e.to_string())?;
+    tx.execute("DELETE FROM entries", [])
+        .map_err(|e| e.to_string())?;
+    let mut inserted = Vec::with_capacity(payload.entries.len());
+    for input in payload.entries {
+        input.verify()?;
+        let EntryInput {
+            title,
+            rating,
+            status,
+            score,
+            duration,
+            interest,
+            comments,
+        } = input;
+        tx.execute(
+            "INSERT INTO entries (title, rating, status, score, duration, interest, comments) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![title, rating, status, score, duration, interest, comments],
+        )
+        .map_err(|e| e.to_string())?;
+        inserted.push(Entry {
+            id: tx.last_insert_rowid(),
+            title,
+            rating,
+            status,
+            score,
+            duration,
+            interest,
+            comments,
+        });
+    }
+    tx.commit().map_err(|e| e.to_string())?;
+    Ok(inserted)
+}
+
+#[tauri::command]
+pub fn export_entries(db: State<'_, Db>) -> Result<String, String> {
+    let conn = db.0.lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT title, rating, status, score, duration, interest, comments FROM entries")
+        .map_err(|e| e.to_string())?;
+    let exported: Vec<ExportedEntry> = stmt
+        .query_map([], |r| {
+            Ok(ExportedEntry {
+                title: r.get(0)?,
+                rating: r.get(1)?,
+                status: r.get(2)?,
+                score: r.get(3)?,
+                duration: r.get(4)?,
+                interest: r.get(5)?,
+                comments: r.get(6)?,
+            })
+        })
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())?;
+    serde_json::to_string_pretty(&serde_json::json!({ "entries": exported }))
+        .map_err(|e| e.to_string())
 }
 
 pub fn open(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
