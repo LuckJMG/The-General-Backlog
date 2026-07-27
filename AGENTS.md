@@ -23,13 +23,13 @@ Tauri 2 desktop app. Tracks backlog entries with a priority score derived from r
 - `src/` — SvelteKit app. Entry: `src/routes/+page.svelte`, layout at `src/routes/+layout.ts`. All shared code under `src/lib/`; shadcn primitives in `src/lib/components/ui/`.
 - `src/lib/db.ts` — `DbEntry`/`EntryStatus` types + 5 thin `invoke()` wrappers, one per Tauri command.
 - `src/lib/priority.ts` — pure `prioritize(entries) → Entry[]` with `priority` min-max normalized to 0-100 (no I/O); inactive statuses (`finished`/`dropped`/`completed`) get `priority: undefined`.
+- `src/lib/columns.ts` — static `columns` array; `Rating` renders `RatingBadge` (sorts undefined last, ascending puts 1 first), `Status` renders `StatusBadge` and sorts by completion rank, `Interest` renders `InterestBadge` and sorts by rank, `Priority` displays the pre-normalized 0-100 value from `prioritize` (`-` when undefined, `sortUndefined: "last"`).
 - `src/lib/components/entry-dialog.svelte` — shared add/edit form (title, status, interest, score, duration, optional rating); instantiated directly by `+page.svelte` (add) and `data-table.svelte` (edit), each binding its own `open` state. `showRating` prop gates the rating row (edit only).
 - `src/lib/components/status-badge.svelte` — colored `Badge` per status; used by the status column cell.
 - `src/lib/components/interest-badge.svelte` — colored `Badge` per interest; used by the interest column cell and dialog select.
 - `src/lib/components/rating-badge.svelte` — colored `Badge` per rating (1-7) with the qualitative word; renders plain `-` (no badge) when null. Used by the rating column cell and edit dialog select.
+- `src/lib/components/data-table.svelte` — TanStack table with hover-revealed action buttons; calls back into the page on delete/edit.
 - `src/routes/+page.svelte` — loads entries on mount, owns the `entries` state, derives `rows` via `prioritize` reactively.
-- `src/routes/data-table.svelte` — TanStack table with hover-revealed action buttons; calls back into the page on delete/edit.
-- `src/routes/columns.ts` — static `columns` array; `Rating` renders `RatingBadge` (sorts undefined last, ascending puts 1 first), `Status` renders `StatusBadge` and sorts by completion rank, `Interest` renders `InterestBadge` and sorts by rank, `Priority` displays the pre-normalized 0-100 value from `prioritize` (`-` when undefined, `sortUndefined: "last"`).
 - `src-tauri/` — Rust crate. Entry: `src-tauri/src/lib.rs` (commands) and `src-tauri/src/main.rs`. Crate name `backlog_lib`. DB code in `src-tauri/src/db.rs`. Capability file: `src-tauri/capabilities/default.json`.
 - Aliases: `$lib` (SvelteKit default), `@/*` -> `src/lib/*` (svelte.config.js). shadcn aliases per `components.json`.
 - App identifier: `com.luck.backlog` (tauri.conf.json). Window: 800x600, single window named `main`.
@@ -57,6 +57,7 @@ No unit/e2e tests or CI exist yet; do not add them unless asked.
 - Vite dev port 1420 is fixed (`strictPort: true`); if it's busy, `tauri dev` will fail. Free the port or change both `vite.config.js` and `tauri.conf.json` `devUrl` together.
 - Tauri Rust commands are registered in `src-tauri/src/lib.rs` via `tauri::generate_handler![...]` and called from the frontend with `invoke()`. Add a new SQL operation as a new command in `src-tauri/src/db.rs` and a matching wrapper in `src/lib/db.ts`; do not introduce `tauri-plugin-sql`.
 - Add/edit dialogs route through the shared `entry-dialog.svelte`. Don't duplicate the form per flow.
+- When adding styles prefer using tailwind classes over pure css, and when using tailwind classes prefer using predefined values instead of forcing units.
 
 ## Gotchas
 - `src-tauri/lib` crate name ends in `_lib` on purpose (Windows bin/lib name collision). Don't rename to `backlog`.
