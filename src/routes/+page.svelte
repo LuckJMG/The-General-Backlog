@@ -2,17 +2,11 @@
 import PlusIcon from "@lucide/svelte/icons/plus";
 import { onMount } from "svelte";
 import { columns } from "$lib/columns.js";
+import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
 import DataTable from "$lib/components/data-table.svelte";
-import EntryDialog from "$lib/components/entry-dialog.svelte";
+import EditEntryDialog from "$lib/components/edit-entry-dialog.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
-import {
-	addEntry,
-	type DbEntry,
-	deleteEntry,
-	initDb,
-	listEntries,
-	updateEntry,
-} from "$lib/db";
+import { type DbEntry, deleteEntry, initDb, listEntries } from "$lib/db";
 import { prioritize } from "$lib/priority";
 
 let entries = $state.raw<DbEntry[]>([]);
@@ -39,24 +33,13 @@ async function handleDelete(id: number) {
 			<PlusIcon />
 			Add entry
 		</Button>
-		<EntryDialog
+		<AddEntryDialog
 			bind:open={addOpen}
-			entry={null}
-			submitLabel="Add"
-			submittingLabel="Adding..."
-			dialogTitle="New Entry"
-			onSubmit={addEntry}
 			onSubmitted={(e) => (entries = [...entries, e])}
 		/>
-		<EntryDialog
+		<EditEntryDialog
 			bind:open={editOpen}
 			entry={editing}
-			submitLabel="Save"
-			submittingLabel="Saving..."
-			dialogTitle="Edit Entry"
-			showRating
-			showComments
-			onSubmit={(input) => updateEntry(editing!.id, input)}
 			onSubmitted={(u) => (entries = entries.map((e) => (e.id === u.id ? u : e)))}
 			onClose={() => (editing = null)}
 		/>
