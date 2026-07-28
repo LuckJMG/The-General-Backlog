@@ -1,71 +1,78 @@
 # Backlog
 
-Tauri 2 desktop app. Tracks backlog entries with a priority score derived from rating and time-to-consume.
+Tauri 2 desktop app. Tracks backlog entries with a priority score derived from score, duration, and interest.
 
-## MVP
-- Single table `entries` with columns: `id` (autoinc), `title` (text), `rating` (integer 1-7, nullable, qualitative word in UI), `status` (text, one of `pending`/`active`/`dropped`/`finished`/`completed`, default `pending`), `score` (real), `duration` (integer, hours), `interest` (text, one of `neutral`/`high`/`low`, default `neutral`). Column order is mirrored exactly in the `Entry` struct, the `EntryDialog` form, the Tauri command signatures, and the displayed table.
-- CRUD via five Tauri commands: `init_db`, `list_entries`, `add_entry`, `update_entry`, `delete_entry`.
-- Priority formula: `score / duration * interest_multiplier` (neutral=1.0, high=1.2, low=0.8), sorted descending; the `Priority` column displays min-max normalized to 0-100 for visual ranking. Entries with status `finished`/`dropped`/`completed` are excluded from the range and render as `-`, pinned to the bottom in both sort directions (`sortUndefined: "last"`).
-- `init_db` migrates pre-status DBs via `ALTER TABLE ... ADD COLUMN status` (guarded by `PRAGMA table_info`). No other migrations; new columns require a DB reset.
-- Status column sorts by rank `completed > finished > dropped > active > pending` (desc); asc is the exact reverse. Rendered as a colored `StatusBadge` (pending=yellow, active=blue, dropped=red, finished=green, completed=purple).
-- Rating scale 1-7 stored as integer, displayed as qualitative words via `RATING_LABELS`: 1=Blasphemy, 2=Horrible, 3=Bad, 4=Neutral, 5=Good, 6=Excellent, 7=Masterpiece. Null renders as plain `-` (no badge) and sorts last in both directions (`sortUndefined: "last"`). Does not affect priority. Shown only in the edit dialog (add dialog omits the field; new entries default to null). Rendered as a `RatingBadge` with a red→gray→green gradient (1=red-700, 2=red-500, 3=red-400, 4=gray-500, 5=green-400, 6=green-500, 7=green-700).
-- Interest column sorts by rank `high > neutral > low`. Rendered as a colored `InterestBadge`.
-- On first launch, `init_db` seeds 5 sample rows if the table is empty (all with `rating=NULL`).
-- Hover-revealed edit/delete buttons per row. Add (from `+page.svelte`) and edit (from `data-table.svelte`) both use the same `EntryDialog` form (title, status, score, duration, interest, optional rating) with non-empty title + positive score/duration validation; the parent owns the `open` state via `bind:open` and toggles the rating field via the `showRating` prop.
-- DB file lives at `<app_data_dir>/backlog.db` per platform (managed by `tauri::Manager` in `src-tauri/src/db.rs:122`).
+## Schema
+Single table `entries`: `id` (autoinc), `title` (text), `rating` (int 1-7, nullable), `status` (text, `pending`/`active`/`dropped`/`finished`/`completed`, default `pending`), `score` (real), `duration` (int hours), `interest` (text, `neutral`/`high`/`low`, default `neutral`), `comments` (text, nullable). Column order mirrored in `Entry` struct, `EntryInput`, dialog form, and table.
+
+## Tauri commands
+Seven: `init_db`, `list_entries`, `add_entry`, `update_entry`, `delete_entry`, `import_entries`, `export_entries`. JSON envelope for import/export: `{ entries: EntryInput[] }`. Import runs in a tx, deletes all rows, re-inserts; export returns pretty JSON string. `init_db` is plain `CREATE TABLE IF NOT EXISTS` — no migrations; schema changes require DB reset (`just clean`).
+
+Validation in `EntryInput::verify`: non-empty title, rating ∈ 1..=7 (if Some), status ∈ STATUSES, interest ∈ INTERESTS, score > 0, duration > 0.
+
+## Priority
+`score / duration * interest_multiplier` (neutral 1.0, high 1.2, low 0.8). `prioritize()` in `src/lib/priority.ts` returns entries with `priority` min-max normalized to 0-100 over active rows; inactive statuses (`finished`/`dropped`/`completed`) get `priority: undefined`. If all active scores equal (span 0), normalizes to 100.
+
+## Sort ranks
+`STATUS_RANK`: pending=0, active=1, dropped=2, finished=3, completed=4. `INTEREST_RANK`: high=0, neutral=1, low=2. Columns sort by `RANK[a] - RANK[b]` so ASC = low-rank-first. Default table sort: `[{ id: "priority", desc: true }]`.
+
+## UI
+
+### Badges
+- `StatusBadge` — pending=yellow, active=blue, dropped=red, finished=green, completed=purple.
+- `InterestBadge` — neutral=gray, high=blue, low=orange.
+- `RatingBadge` — 1=red-700, 2=red-500, 3=red-400, 4=gray-500, 5=green-400, 6=green-500, 7=green-700. Label map inline as `LABELS` (Blasphemy, Horrible, Bad, Neutral, Good, Excellent, Masterpiece). Null renders plain `-`.
+
+### Columns
+Title, Rating, Status, Score, Duration, Interest, Priority. Rating + Priority use `sortUndefined: "last"`. Priority cell renders `-` when undefined.
+
+### Dialogs
+- `EntryDialog` — shared add/edit form. Props: `mode: "add" | "edit"`, `bind:open`, `entry?`, `onSubmitted(entry)`, `onClose()`. Fields: title, status, interest, score, duration, rating, comments. Rating + comments shown in edit mode and when add-mode Bulk switch is on. Bulk keeps the form open after submit (clears title/rating/comments) for rapid entry.
+- `BadgeSelect<T>` — generic Select backed by badge snippets; used for status/interest/rating.
+- `DeleteEntryDialog` — AlertDialog confirm; called from `data-table` delete button.
+- `ConfirmImportDialog` — AlertDialog confirm; called from settings import flow.
+- `SettingsDialog` — Export JSON (save dialog → `writeTextFile`) and Import JSON (file dialog → `readTextFile` → `importEntries`, replaces all rows on confirm).
+
+### Page
+`+page.svelte` loads entries on mount, owns `entries`, derives `rows` via `prioritize` then filters by title (case-insensitive `includes`) and status (or "all"). Toolbar: search input, status filter Select, clear-filters button (visible when any filter active), Add entry, Settings. Add/edit reuse one `EntryDialog`; edit handler copies entry into `editing`, opens the same dialog. `DataTable` shows hover-revealed edit/delete buttons on each row; delete goes through `DeleteEntryDialog`.
 
 ## Stack
-- Frontend: SvelteKit 2 (Svelte 5 runes) + TS strict, shadcn-svelte (vega / lucide / neutral) on Tailwind v4 + `tw-animate-css`. Data table: `@tanstack/table-core` via the local shadcn wrapper at `src/lib/components/ui/data-table/`.
-- Backend: Tauri 2 (Rust) with `rusqlite` (bundled, no `tauri-plugin-sql`).
-- Package manager: bun. Task runner: just. Formatter/linter: Biome. Rust: default rustfmt.
+SvelteKit 2 (Svelte 5 runes) + TS strict, shadcn-svelte (vega / lucide / neutral) on Tailwind v4 + `tw-animate-css`. Data table: `@tanstack/table-core` via `src/lib/components/ui/data-table/`. Tauri 2 with `rusqlite` (bundled), `tauri-plugin-dialog`, `tauri-plugin-fs`, `serde`, `serde_json`. No `tauri-plugin-sql`. bun + just + Biome + rustfmt.
 
 ## Layout
-- `src/` — SvelteKit app. Entry: `src/routes/+page.svelte`, layout at `src/routes/+layout.ts`. All shared code under `src/lib/`; shadcn primitives in `src/lib/components/ui/`.
-- `src/lib/db.ts` — `DbEntry`/`EntryStatus` types + 5 thin `invoke()` wrappers, one per Tauri command.
-- `src/lib/priority.ts` — pure `prioritize(entries) → Entry[]` with `priority` min-max normalized to 0-100 (no I/O); inactive statuses (`finished`/`dropped`/`completed`) get `priority: undefined`.
-- `src/lib/columns.ts` — static `columns` array; `Rating` renders `RatingBadge` (sorts undefined last, ascending puts 1 first), `Status` renders `StatusBadge` and sorts by completion rank, `Interest` renders `InterestBadge` and sorts by rank, `Priority` displays the pre-normalized 0-100 value from `prioritize` (`-` when undefined, `sortUndefined: "last"`).
-- `src/lib/components/entry-dialog.svelte` — shared add/edit form (title, status, interest, score, duration, optional rating); instantiated directly by `+page.svelte` (add) and `data-table.svelte` (edit), each binding its own `open` state. `showRating` prop gates the rating row (edit only).
-- `src/lib/components/status-badge.svelte` — colored `Badge` per status; used by the status column cell.
-- `src/lib/components/interest-badge.svelte` — colored `Badge` per interest; used by the interest column cell and dialog select.
-- `src/lib/components/rating-badge.svelte` — colored `Badge` per rating (1-7) with the qualitative word; renders plain `-` (no badge) when null. Used by the rating column cell and edit dialog select.
-- `src/lib/components/data-table.svelte` — TanStack table with hover-revealed action buttons; calls back into the page on delete/edit.
-- `src/routes/+page.svelte` — loads entries on mount, owns the `entries` state, derives `rows` via `prioritize` reactively.
-- `src-tauri/` — Rust crate. Entry: `src-tauri/src/lib.rs` (commands) and `src-tauri/src/main.rs`. Crate name `backlog_lib`. DB code in `src-tauri/src/db.rs`. Capability file: `src-tauri/capabilities/default.json`.
-- Aliases: `$lib` (SvelteKit default), `@/*` -> `src/lib/*` (svelte.config.js). shadcn aliases per `components.json`.
-- App identifier: `com.luck.backlog` (tauri.conf.json). Window: 800x600, single window named `main`.
+- `src/lib/db.ts` — types + 7 `invoke()` wrappers + `STATUS_RANK`/`INTEREST_RANK`/`INTEREST_MULTIPLIER`/`ENTRY_STATUSES`/`ENTRY_INTERESTS`/`RATING_VALUES` constants.
+- `src/lib/priority.ts` — pure `prioritize()`.
+- `src/lib/columns.ts` — static `columns` array.
+- `src/lib/components/` — `entry-dialog`, `data-table`, `badge-select`, `status-badge`, `interest-badge`, `rating-badge`, `delete-entry-dialog`, `confirm-import-dialog`, `settings-dialog`.
+- `src/routes/+page.svelte` — page state + chrome.
+- `src/routes/+layout.ts` — `export const ssr = false`.
+- `src-tauri/src/lib.rs` — registers commands, plugins, `setup` calls `db::open`.
+- `src-tauri/src/db.rs` — all SQL.
+- `src-tauri/capabilities/default.json` — `core:default` + dialog/fs permissions, fs scope `**`.
+
+Aliases: `$lib` (default), `@/*` -> `src/lib/*` (svelte.config.js). shadcn per `components.json`. App id `com.luck.backlog`, window 800x600, single window named `main`.
 
 ## Commands
 Run from repo root unless noted.
-- `just dev` — start Tauri dev (runs `bun tauri dev`, which spawns Vite on 1420 then the Rust app).
-- `just clean` — deletes the current DB state for a fresh start.
-- `just lint` — biome check with `--write` (formats + lints + organizes imports).
-- `bun run check` — `svelte-kit sync` + `svelte-check` (typecheck). Run after schema/code changes.
-- `bun tauri dev` / `bun tauri build` — same as `just dev` plus release build. `tauri.conf.json` already wires beforeDev/beforeBuild to `bun run dev` / `bun run build`.
-- `cargo fmt` (in `src-tauri/`) — Rust formatting, on demand. No nightly toolchain pinned.
-- `cargo build` / `cargo check` (in `src-tauri/`) — Rust compile/typecheck when not running the full Tauri app.
-
-## Verification flow
-1. `just lint` — fix anything biome reports.
-2. `bun run check` — must pass before considering frontend work done.
-No unit/e2e tests or CI exist yet; do not add them unless asked.
+- `just dev` — exports `WEBKIT_DISABLE_DMABUF_RENDERER=1 LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe` then `bun tauri dev` (Linux GPU workarounds). Vite on 1420 (fixed, `strictPort: true`).
+- `just clean` — `rm -rf ~/.local/share/com.luck.backlog/backlog.db` (Linux path; manual delete on other OS).
+- `just lint` — `bunx --bun @biomejs/biome check --write`.
+- `bun run check` — `svelte-kit sync` + `svelte-check`.
+- `cargo fmt` / `cargo check` (in `src-tauri/`) — on demand.
 
 ## Conventions
-- Indent: tabs. JS/TS string quotes: double. Biome handles both.
-- Imports are auto-organized by biome; don't fight it.
-- In `.svelte` files, biome allows `useConst`/`useImportType`/unused-var warnings off. Other files stay on the `recommended` preset.
-- SvelteKit is SPA-only (`ssr=false`, `adapter-static` with `index.html` fallback). Do not add `+page.server.ts` or SSR-only APIs.
-- Vite dev port 1420 is fixed (`strictPort: true`); if it's busy, `tauri dev` will fail. Free the port or change both `vite.config.js` and `tauri.conf.json` `devUrl` together.
-- Tauri Rust commands are registered in `src-tauri/src/lib.rs` via `tauri::generate_handler![...]` and called from the frontend with `invoke()`. Add a new SQL operation as a new command in `src-tauri/src/db.rs` and a matching wrapper in `src/lib/db.ts`; do not introduce `tauri-plugin-sql`.
-- Add/edit dialogs route through the shared `entry-dialog.svelte`. Don't duplicate the form per flow.
-- When adding styles prefer using tailwind classes over pure css, and when using tailwind classes prefer using predefined values instead of forcing units.
+- Tabs, double quotes (Biome enforces).
+- `.svelte` overrides: `useConst`/`useImportType`/`noUnusedVariables`/`noUnusedImports` off; other files use `recommended`.
+- SPA-only (`ssr=false`, `adapter-static` with `index.html` fallback). No SSR.
+- Vite port 1420 is fixed; change both `vite.config.js` and `tauri.conf.json` `devUrl` together.
+- New SQL op → new command in `db.rs` + wrapper in `db.ts`. No `tauri-plugin-sql`.
+- Prefer Tailwind classes over raw CSS; prefer predefined scale values over forced units.
+- Bug fix = root cause, not symptom. One guard in the shared function beats N guards at callers.
 
 ## Gotchas
-- `src-tauri/lib` crate name ends in `_lib` on purpose (Windows bin/lib name collision). Don't rename to `backlog`.
-- `vite.config.js` ignores `src-tauri/**` from the watcher. Rust changes need a manual rebuild / `tauri dev` reload.
-- `.svelte-kit/`, `build/`, `src-tauri/target/`, and `src-tauri/gen/schemas` are generated — never edit by hand.
-- `tauri.conf.json` `frontendDist` is `../build` (relative to `src-tauri/`); `bun run build` must run before `tauri build`.
-- `opencode.json` enables the Svelte plugin (MCP) and formatter. No repo-local agent rules file exists beyond this.
-- The seed block in `init_db` only runs when `SELECT COUNT(*) FROM entries` is 0 — wiping the DB file is the only way to re-seed.
-
-## Git workflow
-No convention enforced. Commit to `main` is fine.
+- Crate name `backlog_lib` (Windows bin/lib collision). Don't rename.
+- `vite.config.js` ignores `src-tauri/**`; Rust changes need manual rebuild.
+- Generated, never edit: `.svelte-kit/`, `build/`, `src-tauri/target/`, `src-tauri/gen/schemas`.
+- `tauri.conf.json` `frontendDist` is `../build`; run `bun run build` before `tauri build`.
+- Seed block in `init_db` runs only when `COUNT(*) = 0`. Wipe the DB file to re-seed.
+- `opencode.json` enables the Svelte MCP plugin + formatter.
