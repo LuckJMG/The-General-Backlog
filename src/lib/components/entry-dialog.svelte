@@ -18,14 +18,26 @@ import {
 	type EntryRating,
 	type EntryStatus,
 	RATING_VALUES,
+	updateEntry,
 } from "$lib/db";
 
+type Mode = "add" | "edit";
+
 type Props = {
+	mode: Mode;
 	open?: boolean;
+	entry?: DbEntry | null;
 	onSubmitted?: (entry: DbEntry) => void;
+	onClose?: () => void;
 };
 
-let { open = $bindable(false), onSubmitted }: Props = $props();
+let {
+	mode,
+	open = $bindable(false),
+	entry = null,
+	onSubmitted,
+	onClose,
+}: Props = $props();
 
 type Form = {
 	title: string;
@@ -53,6 +65,22 @@ let form = $state<Form>({ ...DEFAULT_FORM });
 let submitting = $state(false);
 let bulk = $state(false);
 
+const isEdit = $derived(mode === "edit");
+
+$effect(() => {
+	if (isEdit && entry) {
+		form.title = entry.title;
+		form.rating = entry.rating == null ? "" : String(entry.rating);
+		form.status = entry.status;
+		form.interest = entry.interest;
+		form.score = String(entry.score);
+		form.duration = String(entry.duration);
+		form.comments = entry.comments ?? "";
+	} else {
+		form = { ...DEFAULT_FORM };
+	}
+});
+
 const canSubmit = $derived.by(() => {
 	const score = Number(form.score);
 	const duration = Number(form.duration);
@@ -67,12 +95,14 @@ const canSubmit = $derived.by(() => {
 
 async function submit() {
 	if (!canSubmit) return;
+	const editing = mode === "edit" ? entry : null;
+	if (mode === "edit" && !editing) return;
 	submitting = true;
 	try {
 		const rating: EntryRating | null =
 			form.rating === "" ? null : (Number(form.rating) as EntryRating);
 		const comments = form.comments.trim() === "" ? null : form.comments.trim();
-		const result = await addEntry({
+		const payload = {
 			title: form.title.trim(),
 			rating,
 			status: form.status,
@@ -80,9 +110,12 @@ async function submit() {
 			duration: Number(form.duration),
 			interest: form.interest,
 			comments,
-		});
+		};
+		const result = editing
+			? await updateEntry(editing.id, payload)
+			: await addEntry(payload);
 		onSubmitted?.(result);
-		if (bulk) {
+		if (!editing && bulk) {
 			form.title = "";
 			form.rating = "";
 			form.comments = "";
@@ -94,12 +127,17 @@ async function submit() {
 		submitting = false;
 	}
 }
+
+function handleOpenChange(next: boolean) {
+	open = next;
+	if (!next && isEdit) onClose?.();
+}
 </script>
 
-<Dialog.Root bind:open>
+<Dialog.Root bind:open onOpenChange={handleOpenChange}>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title>New Entry</Dialog.Title>
+			<Dialog.Title>{isEdit ? "Edit Entry" : "New Entry"}</Dialog.Title>
 		</Dialog.Header>
 		<form
 			onsubmit={(e) => {
@@ -155,7 +193,7 @@ async function submit() {
 					/>
 				</div>
 			</div>
-			{#if bulk}
+			{#if isEdit || bulk}
 				<BadgeSelect
 					id="entry-rating"
 					label="Rating"
@@ -180,13 +218,23 @@ async function submit() {
 					/>
 				</div>
 			{/if}
-			<Dialog.Footer class="!flex-row !justify-between">
-				<Label class="flex items-center gap-2">
-					Bulk
-					<Switch bind:checked={bulk} size="sm" />
-				</Label>
+			<Dialog.Footer class={!isEdit ? "flex-row! justify-between!" : undefined}>
+				{#if !isEdit}
+					<Label class="flex items-center gap-2">
+						Bulk
+						<Switch bind:checked={bulk} size="sm" />
+					</Label>
+				{/if}
 				<Button type="submit" disabled={!canSubmit || submitting}>
-					{submitting ? "Adding..." : bulk ? "Add & next" : "Add"}
+					{submitting
+						? isEdit
+							? "Saving..."
+							: "Adding..."
+						: isEdit
+							? "Save"
+							: bulk
+								? "Add & next"
+								: "Add"}
 				</Button>
 			</Dialog.Footer>
 		</form>

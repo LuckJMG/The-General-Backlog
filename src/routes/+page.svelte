@@ -5,9 +5,8 @@ import SettingsIcon from "@lucide/svelte/icons/settings";
 import XIcon from "@lucide/svelte/icons/x";
 import { onMount } from "svelte";
 import { columns } from "$lib/columns.js";
-import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
 import DataTable from "$lib/components/data-table.svelte";
-import EditEntryDialog from "$lib/components/edit-entry-dialog.svelte";
+import EntryDialog from "$lib/components/entry-dialog.svelte";
 import SettingsDialog from "$lib/components/settings-dialog.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
@@ -39,8 +38,7 @@ onMount(async () => {
 	entries = await listEntries();
 });
 
-let addOpen = $state(false);
-let editOpen = $state(false);
+let dialogOpen = $state(false);
 let settingsOpen = $state(false);
 let editing = $state<DbEntry | null>(null);
 
@@ -94,7 +92,7 @@ async function handleDelete(id: number) {
 			</Button>
 		{/if}
 		<div class="ml-auto flex gap-2">
-			<Button variant="outline" onclick={() => (addOpen = true)}>
+			<Button variant="outline" onclick={() => (dialogOpen = true)}>
 				<PlusIcon />
 				Add entry
 			</Button>
@@ -107,14 +105,15 @@ async function handleDelete(id: number) {
 				<SettingsIcon />
 			</Button>
 		</div>
-		<AddEntryDialog
-			bind:open={addOpen}
-			onSubmitted={(e) => (entries = [...entries, e])}
-		/>
-		<EditEntryDialog
-			bind:open={editOpen}
+		<EntryDialog
+			bind:open={dialogOpen}
+			mode={editing ? "edit" : "add"}
 			entry={editing}
-			onSubmitted={(u) => (entries = entries.map((e) => (e.id === u.id ? u : e)))}
+			onSubmitted={(e) => {
+				entries = editing
+					? entries.map((x) => (x.id === e.id ? e : x))
+					: [...entries, e];
+			}}
 			onClose={() => (editing = null)}
 		/>
 		<SettingsDialog
@@ -128,7 +127,7 @@ async function handleDelete(id: number) {
 		onDelete={handleDelete}
 		onEditRequest={(e) => {
 			editing = { ...e };
-			editOpen = true;
+			dialogOpen = true;
 		}}
 	/>
 </div>
