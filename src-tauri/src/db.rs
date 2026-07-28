@@ -17,23 +17,12 @@ pub struct Entry {
     pub comments: Option<String>,
 }
 
-#[derive(Serialize)]
-struct ExportedEntry {
-    pub title: String,
-    pub rating: Option<i64>,
-    pub status: String,
-    pub score: f64,
-    pub duration: i64,
-    pub interest: String,
-    pub comments: Option<String>,
-}
-
-#[derive(Deserialize)]
-struct ImportPayload {
+#[derive(Serialize, Deserialize)]
+struct EntryEnvelope {
     entries: Vec<EntryInput>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct EntryInput {
     pub title: String,
     pub rating: Option<i64>,
@@ -228,7 +217,7 @@ pub fn delete_entry(db: State<'_, Db>, id: i64) -> Result<(), String> {
 
 #[tauri::command]
 pub fn import_entries(db: State<'_, Db>, json: String) -> Result<Vec<Entry>, String> {
-    let payload: ImportPayload =
+    let payload: EntryEnvelope =
         serde_json::from_str(&json).map_err(|e| format!("invalid JSON: {e}"))?;
     let mut conn = db.0.lock().map_err(|e| e.to_string())?;
     let tx = conn.transaction().map_err(|e| e.to_string())?;
@@ -272,9 +261,9 @@ pub fn export_entries(db: State<'_, Db>) -> Result<String, String> {
     let mut stmt = conn
         .prepare("SELECT title, rating, status, score, duration, interest, comments FROM entries")
         .map_err(|e| e.to_string())?;
-    let exported: Vec<ExportedEntry> = stmt
+    let exported: Vec<EntryInput> = stmt
         .query_map([], |r| {
-            Ok(ExportedEntry {
+            Ok(EntryInput {
                 title: r.get(0)?,
                 rating: r.get(1)?,
                 status: r.get(2)?,
@@ -287,8 +276,7 @@ pub fn export_entries(db: State<'_, Db>) -> Result<String, String> {
         .map_err(|e| e.to_string())?
         .collect::<Result<Vec<_>, _>>()
         .map_err(|e| e.to_string())?;
-    serde_json::to_string_pretty(&serde_json::json!({ "entries": exported }))
-        .map_err(|e| e.to_string())
+    serde_json::to_string_pretty(&EntryEnvelope { entries: exported }).map_err(|e| e.to_string())
 }
 
 pub fn open(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
