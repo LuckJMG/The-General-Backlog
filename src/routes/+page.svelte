@@ -2,23 +2,36 @@
 import PlusIcon from "@lucide/svelte/icons/plus";
 import SearchIcon from "@lucide/svelte/icons/search";
 import SettingsIcon from "@lucide/svelte/icons/settings";
+import XIcon from "@lucide/svelte/icons/x";
 import { onMount } from "svelte";
 import { columns } from "$lib/columns.js";
 import AddEntryDialog from "$lib/components/add-entry-dialog.svelte";
 import DataTable from "$lib/components/data-table.svelte";
 import EditEntryDialog from "$lib/components/edit-entry-dialog.svelte";
 import SettingsDialog from "$lib/components/settings-dialog.svelte";
+import StatusBadge from "$lib/components/status-badge.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
-import { type DbEntry, deleteEntry, initDb, listEntries } from "$lib/db";
+import * as Select from "$lib/components/ui/select/index.js";
+import {
+	type DbEntry,
+	deleteEntry,
+	ENTRY_STATUSES,
+	type EntryStatus,
+	initDb,
+	listEntries,
+} from "$lib/db";
 import { prioritize } from "$lib/priority";
 
 let entries = $state.raw<DbEntry[]>([]);
 let query = $state("");
+let statusFilter = $state<EntryStatus | "all">("all");
 let rows = $derived(
-	prioritize(entries).filter((entry) =>
-		entry.title.toLowerCase().includes(query.trim().toLowerCase()),
-	),
+	prioritize(entries)
+		.filter((entry) =>
+			entry.title.toLowerCase().includes(query.trim().toLowerCase()),
+		)
+		.filter((entry) => statusFilter === "all" || entry.status === statusFilter),
 );
 
 onMount(async () => {
@@ -50,6 +63,36 @@ async function handleDelete(id: number) {
 				aria-label="Filter by title"
 			/>
 		</div>
+		<Select.Root type="single" bind:value={statusFilter}>
+			<Select.Trigger class="w-30" aria-label="Filter by status">
+				{#if statusFilter === "all"}
+					<span>All statuses</span>
+				{:else}
+					<StatusBadge status={statusFilter} />
+				{/if}
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Item value="all" label="All statuses">All statuses</Select.Item>
+				{#each ENTRY_STATUSES as s (s)}
+					<Select.Item value={s} label={s}>
+						<StatusBadge status={s} />
+					</Select.Item>
+				{/each}
+			</Select.Content>
+		</Select.Root>
+		{#if statusFilter !== "all" || query !== ""}
+			<Button
+				variant="ghost"
+				size="icon"
+				aria-label="Clear filters"
+				onclick={() => {
+					statusFilter = "all";
+					query = "";
+				}}
+			>
+				<XIcon />
+			</Button>
+		{/if}
 		<div class="ml-auto flex gap-2">
 			<Button variant="outline" onclick={() => (addOpen = true)}>
 				<PlusIcon />
