@@ -18,16 +18,6 @@ export const RATING_VALUES = [1, 2, 3, 4, 5, 6, 7] as const;
 
 export type EntryRating = (typeof RATING_VALUES)[number];
 
-export const RATING_LABELS: Record<EntryRating, string> = {
-	1: "Blasphemy",
-	2: "Horrible",
-	3: "Bad",
-	4: "Neutral",
-	5: "Good",
-	6: "Excellent",
-	7: "Masterpiece",
-};
-
 export const STATUS_RANK: Record<EntryStatus, number> = {
 	pending: 0,
 	active: 1,

@@ -1,6 +1,16 @@
 <script lang="ts">
 import { Badge } from "$lib/components/ui/badge/index.js";
-import { type EntryRating, RATING_LABELS } from "$lib/db";
+import { type EntryRating } from "$lib/db";
+
+const LABELS: Record<EntryRating, string> = {
+	1: "Blasphemy",
+	2: "Horrible",
+	3: "Bad",
+	4: "Neutral",
+	5: "Good",
+	6: "Excellent",
+	7: "Masterpiece",
+};
 
 let { rating }: { rating: EntryRating | null | undefined } = $props();
 
@@ -18,5 +28,5 @@ const COLORS: Record<EntryRating, string> = {
 {#if rating == null}
 	<span class="text-muted-foreground">-</span>
 {:else}
-	<Badge variant="outline" class={COLORS[rating]}>{RATING_LABELS[rating]}</Badge>
+		<Badge variant="outline" class={COLORS[rating]}>{LABELS[rating]}</Badge>
 {/if}
