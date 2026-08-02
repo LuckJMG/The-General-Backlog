@@ -11,6 +11,7 @@ import SettingsDialog from "$lib/components/settings-dialog.svelte";
 import StatusBadge from "$lib/components/status-badge.svelte";
 import { Button } from "$lib/components/ui/button/index.js";
 import { Input } from "$lib/components/ui/input/index.js";
+import * as Pagination from "$lib/components/ui/pagination/index.js";
 import * as Select from "$lib/components/ui/select/index.js";
 import {
 	type DbEntry,
@@ -22,9 +23,12 @@ import {
 } from "$lib/db";
 import { prioritize } from "$lib/priority";
 
+const PER_PAGE = 20;
+
 let entries = $state.raw<DbEntry[]>([]);
 let query = $state("");
 let statusFilter = $state<EntryStatus | "all">("all");
+let page = $state(1);
 let rows = $derived(
 	prioritize(entries)
 		.filter((entry) =>
@@ -32,6 +36,12 @@ let rows = $derived(
 		)
 		.filter((entry) => statusFilter === "all" || entry.status === statusFilter),
 );
+let pagedRows = $derived(rows.slice((page - 1) * PER_PAGE, page * PER_PAGE));
+
+$effect(() => {
+	rows.length;
+	page = 1;
+});
 
 onMount(async () => {
 	await initDb();
@@ -122,7 +132,7 @@ async function handleDelete(id: number) {
 		/>
 	</div>
 	<DataTable
-		data={rows}
+		data={pagedRows}
 		{columns}
 		onDelete={handleDelete}
 		onEditRequest={(e) => {
@@ -130,4 +140,29 @@ async function handleDelete(id: number) {
 			dialogOpen = true;
 		}}
 	/>
+	<Pagination.Root count={rows.length} perPage={PER_PAGE} bind:page class="mt-4">
+		{#snippet children({ pages, currentPage })}
+			<Pagination.Content>
+				<Pagination.Item>
+					<Pagination.PrevButton />
+				</Pagination.Item>
+				{#each pages as p (p.key)}
+					{#if p.type === "ellipsis"}
+						<Pagination.Item>
+							<Pagination.Ellipsis />
+						</Pagination.Item>
+					{:else}
+						<Pagination.Item>
+							<Pagination.Link page={p} isActive={p.value === currentPage}>
+								{p.value}
+							</Pagination.Link>
+						</Pagination.Item>
+					{/if}
+				{/each}
+				<Pagination.Item>
+					<Pagination.NextButton />
+				</Pagination.Item>
+			</Pagination.Content>
+		{/snippet}
+	</Pagination.Root>
 </div>
